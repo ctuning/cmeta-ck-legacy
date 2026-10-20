@@ -1,0 +1,8 @@
+authors: Grigori Fursin
+description: Extract the 55 original MILEPOST GCC static features from C89 source.
+cache: false
+store_global: false
+params_map:
+  source-file: source_file
+  output-file: output_file
+  runtime-root: runtime_root

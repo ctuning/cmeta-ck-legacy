@@ -1,0 +1,16 @@
+artifact: 4e719bc8239d4ece
+category: task,c36be4b9314a45e0
+authors: Grigori Fursin
+creation_timestamp: '2026-10-20T17:15:28.069892+00:00'
+generator:
+  method: agent
+  agent: OpenAI Codex 0.162.1
+  via: cmeta 0.37.4
+  by: Grigori Fursin
+uses_categories:
+  host: host,e4e49c251c814f6d
+tags:
+- milepost
+- legacy
+- features
+last_update_timestamp: '2026-10-20T18:31:14.915420+00:00'
