@@ -9,28 +9,26 @@ It has a separate experimental task UID and selects no website ports by default.
 
 ## Extract features from a C program
 
-On compatible Linux amd64, or inside a cMeta Linux container with the prepared
-runtime mounted, with cMeta and its usual AOps task category installed:
+On any machine with Docker or Podman (Windows, macOS, Linux), with cMeta and its
+usual AOps task category installed:
 
 ```sh
-cx task run extract-milepost-features-legacy,4e719bc8239d4ece --runtime-root=/path/legacy-runtime --source-file=/path/example.c --output-file=/path/features.json -q
+cx task run extract-milepost-features-legacy,4e719bc8239d4ece --source-file=example.c --output-file=features.json -q
 ```
 
-Alternatively set `CMETA_MILEPOST_ROOT` once. The direct mode launches the original
-GCC 4.4.4 / ICI 2.05 / MILEPOST 2.1 / XSB 3.2 / CCC tools locally. It uses no HTTP
-server, website project, Docker socket or website credentials. The result includes
-the original 55 static features and JSON values. Use GNU89/C89 programs of at most
-64 KiB. The compiled user program is not executed.
+The task prepares the original GCC 4.4.4 / ICI 2.05 / MILEPOST 2.1 / XSB 3.2 / CCC
+tools once into a container volume and extracts the original 55 static features in a
+throwaway Linux container (read-only runtime, no network). It uses no website, port or
+credentials. Use GNU89/C89 programs of at most 64 KiB; the program is not executed.
+On Linux amd64 with glibc 2.38+, `--runtime-root=<folder>` runs the tools natively.
+See the [task guide](task/extract-milepost-features-legacy/README.md).
 
-Windows and macOS need a compatible Linux amd64 container or VM for these old
-binaries. cMeta runs inside that environment using the same command. See the
-[task guide](task/extract-milepost-features-legacy/README.md) for preparing the runtime.
-
-Large recovered binary capsules are deliberately separate from Git source. The
-private checked captures currently live in
-a private result artifact; they can be copied
-to another machine without installing or running any website. The task source
-contains their required SHA-256 checksums and preserves original software notices.
+The binary capsules are deliberately separate from Git source: five public files
+`20261114.*.linux-amd64.tar.gz`, published with all their sources and licences in
+the archive record [10.5281/zenodo.24246695](https://doi.org/10.5281/zenodo.24246695),
+from which the task downloads them by default (`--capsules` names another folder or
+URL). The task source contains their SHA-256 checksums. The older private captures are
+still accepted (`--capture`); they are not published.
 
 ## Git identity
 

@@ -21,36 +21,106 @@ import tarfile
 import tempfile
 import threading
 import time
+import urllib.request
 
 MAX_SOURCE = 65536
+
+# The public capsules (one archive record of 2026-11-14, with all sources and licences).
+# The first four extract into <root>/tools, the headers capsule into <root> (its top folder is headers/).
+PUBLIC_TOOLS = {
+    '20261114.milepost-gcc-4.4.4.linux-amd64.tar.gz': 'a211129cf85f8c9df196185880955d59504e672d89becb8f5daff09db7575c84',
+    '20261114.xsb-3.2.linux-amd64.tar.gz': '290fdc244b95596b617a3c0a2ba54c5127350995d7688fb1aa8d97eadb760778',
+    '20261114.ccc-framework.linux-amd64.tar.gz': '65a6e1fd41ba7d8a4d4ebb6eda7db1016a070a5a68bee76b3145c0e00dc8d0ff',
+    '20261114.compiler-support.linux-amd64.tar.gz': '3bf0c3f8ba735d446e1b068bc19334cc786abdf17262ff5ceb45add34bc8e04f',
+}
+PUBLIC_HEADERS = '20261114.compiler-headers.linux-amd64.tar.gz'
+
+# The private capture of 2026-10-20 (--capture); runtimes prepared from it stay valid.
 CAPSULES = {
     'milepost-runtime.tar.gz': 'e0e91e3963c9308a746667618500f3b63afeef668fd6c71a36577df76ed9bfb2',
     'compiler-support.tar.gz': '3bf0c3f8ba735d446e1b068bc19334cc786abdf17262ff5ceb45add34bc8e04f',
 }
 
 
+# The same header capsule in both sets.
 HEADERS_SHA256 = '587ffad6386f86d4cd0ce76cbd241f9c92e59eca17e7e8462e40642d32eb9f87'
 
 
-def prepare_tools(root, capture):
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as stream:
+        for block in iter(lambda: stream.read(1 << 20), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def safe_extract(archive, target):
+    """Extract a capsule; Pythons without tarfile filters (before 3.12 / the 2023 backports) get the same checks."""
+    with tarfile.open(archive) as tar:
+        if hasattr(tarfile, 'data_filter'):
+            tar.extractall(target, filter='data')
+            return
+        base = os.path.realpath(target)
+        for member in tar.getmembers():
+            path = os.path.realpath(os.path.join(base, member.name))
+            link = member.issym() and os.path.realpath(os.path.join(os.path.dirname(path), member.linkname))
+            hard = member.islnk() and os.path.realpath(os.path.join(base, member.linkname))
+            for p in filter(None, (path, link, hard)):
+                if os.path.commonpath([base, p]) != base:
+                    raise ValueError('Unsafe path in software capsule: '+member.name)
+            if member.isdev():
+                raise ValueError('Device file in software capsule: '+member.name)
+        tar.extractall(target)
+
+
+def fetch(source, name, digest, folder):
+    """A capsule from a folder, or downloaded from a URL (template with {name}, or a base URL); always checked."""
+    if '://' not in source:
+        path = Path(source)/name
+    else:
+        url = source.replace('{name}', name) if '{name}' in source else source.rstrip('/')+'/'+name
+        path = folder/name
+        part = folder/(name+'.part')
+        for attempt in range(3):
+            try:
+                request = urllib.request.Request(url, headers={'User-Agent': 'cmeta-milepost-legacy'})
+                with urllib.request.urlopen(request, timeout=120) as response, part.open('wb') as stream:
+                    shutil.copyfileobj(response, stream, 1 << 20)
+                part.rename(path)
+                break
+            except OSError:
+                part.unlink(missing_ok=True)
+                if attempt == 2:
+                    raise
+                time.sleep(5*(attempt+1))
+    if sha256_file(path) != digest:
+        raise ValueError('Software capsule checksum mismatch: '+name)
+    return path
+
+
+def prepare_tools(root, capture=None, capsules=None):
     root.mkdir(parents=True, exist_ok=True)
+    identity = CAPSULES if capture else PUBLIC_TOOLS
     with (root/'prepare.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         tools = root/'tools'
         if (tools/'ready.json').exists():
-            if json.loads((tools/'ready.json').read_text()) != CAPSULES:
+            if json.loads((tools/'ready.json').read_text()) != identity:
                 raise ValueError('Installed software identity differs from the checked capsule')
             return tools
         stage = Path(tempfile.mkdtemp(prefix='install-', dir=root))
+        downloads = Path(tempfile.mkdtemp(prefix='download-', dir=root))
         try:
-            for name, digest in CAPSULES.items():
-                archive = capture/name
-                with archive.open('rb') as stream:
-                    actual = hashlib.file_digest(stream, 'sha256').hexdigest()
-                if actual != digest:
-                    raise ValueError('Software capsule checksum mismatch: '+name)
-                with tarfile.open(archive) as tar:
-                    tar.extractall(stage, filter='data')
+            for name, digest in identity.items():
+                if capture:
+                    archive = capture/name
+                    if sha256_file(archive) != digest:
+                        raise ValueError('Software capsule checksum mismatch: '+name)
+                else:
+                    archive = fetch(capsules, name, digest, downloads)
+                safe_extract(archive, stage)
+                if archive.parent == downloads:
+                    archive.unlink()
             ccc = stage/'ccc-framework'
             # Relocate only the copied historical profiles, before making tools read-only.
             replacements = [
@@ -62,7 +132,7 @@ def prepare_tools(root, capture):
                 if old not in text:
                     raise ValueError('Unexpected historical profile: '+str(path))
                 path.write_text(text.replace(old, new))
-            (stage/'ready.json').write_text(json.dumps(CAPSULES, sort_keys=True))
+            (stage/'ready.json').write_text(json.dumps(identity, sort_keys=True))
             if tools.exists():
                 raise ValueError('Incomplete software installation retained; inspect before retrying')
             stage.rename(tools)
@@ -73,13 +143,17 @@ def prepare_tools(root, capture):
                         p.chmod(0o555 if p.is_dir() or p.stat().st_mode & 0o111 else 0o444)
             tools.chmod(0o555)
         finally:
-            if stage.exists():
-                shutil.rmtree(stage)
+            for folder in (stage, downloads):
+                if folder.exists():
+                    shutil.rmtree(folder)
     return tools
 
 
-def prepare(root, capture):
-    tools = prepare_tools(root, capture)
+def prepare(root, capture=None, capsules=None):
+    """--capture: the private capture folder of 2026-10-20; --capsules: a folder or URL with the public capsules."""
+    if not (capture or capsules):
+        raise ValueError('Give --capsules=<folder or URL> (or --capture=<private capture folder>)')
+    tools = prepare_tools(root, capture, capsules)
     headers = root/'headers'
     with (root/'prepare.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -87,14 +161,15 @@ def prepare(root, capture):
             if json.loads((headers/'ready.json').read_text())['sha256'] != HEADERS_SHA256:
                 raise ValueError('Installed C headers differ from the checked capsule')
             return tools
-        archive = capture.parent/'20261020-headers/compiler-headers.tar.gz'
-        with archive.open('rb') as stream:
-            if hashlib.file_digest(stream,'sha256').hexdigest()!=HEADERS_SHA256:
-                raise ValueError('C header capsule checksum mismatch')
         with tempfile.TemporaryDirectory(prefix='headers-',dir=root) as directory:
             stage = Path(directory)
-            with tarfile.open(archive) as tar:
-                tar.extractall(stage,filter='data')
+            if capture:
+                archive = capture.parent/'20261020-headers/compiler-headers.tar.gz'
+                if sha256_file(archive)!=HEADERS_SHA256:
+                    raise ValueError('C header capsule checksum mismatch')
+            else:
+                archive = fetch(capsules, PUBLIC_HEADERS, HEADERS_SHA256, stage)
+            safe_extract(archive, stage)
             (stage/'headers/ready.json').write_text(json.dumps({'sha256':HEADERS_SHA256}))
             (stage/'headers').rename(headers)
         for parent,dirs,files in os.walk(headers):
@@ -105,14 +180,15 @@ def prepare(root, capture):
     return tools
 
 
-def job(root, source):
+def job(root, source, work=None):
+    """work: a writable folder for the jobs (default: the runtime root), so the runtime itself can be read-only."""
     if not isinstance(source, str) or not source.strip() or len(source.encode()) > MAX_SOURCE:
         return {'ok': False, 'error': 'Submit a nonempty C program of at most 64 KiB.'}
     tools = root/'tools'
     if not (tools/'ready.json').exists():
         return {'ok': False, 'error': 'The recovered compiler is not prepared.'}
-    jobs = root/'jobs'
-    jobs.mkdir(mode=0o700, exist_ok=True)
+    jobs = (work or root)/'jobs'
+    jobs.mkdir(mode=0o700, parents=True, exist_ok=True)
     started = time.monotonic()
     with tempfile.TemporaryDirectory(prefix='extract-', dir=jobs) as directory:
         work = Path(directory)
@@ -153,20 +229,22 @@ def job(root, source):
         return record
 
 
-def extract(root, source):
-    root.mkdir(parents=True, exist_ok=True)
-    with (root/'extract.lock').open('a') as lock:
+def extract(root, source, work=None):
+    work = work or root
+    work.mkdir(parents=True, exist_ok=True)
+    with (work/'extract.lock').open('a') as lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             return {'ok': False, 'error': 'The legacy compiler is busy. Please try again shortly.'}
-        return extract_locked(root, source)
+        return extract_locked(root, source, work)
 
 
-def extract_locked(root, source):
+def extract_locked(root, source, work=None):
     """Each compiler job gets a fresh process group, bounded lifetime and no inherited secrets."""
+    work = work or root
     start = time.monotonic()
-    process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'job', '--root', str(root)],
+    process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'job', '--root', str(root), '--work', str(work)],
                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                start_new_session=True, env={'PATH': '/usr/bin:/bin', 'LANG': 'C'})
     try:
@@ -185,7 +263,7 @@ def extract_locked(root, source):
         except ProcessLookupError:
             pass
         # A killed historical job cannot run TemporaryDirectory's cleanup itself.
-        jobs = root/'jobs'
+        jobs = work/'jobs'
         if jobs.is_dir():
             for path in jobs.glob('extract-*'):
                 if path.is_dir() and not path.is_symlink() and path.resolve().parent==jobs.resolve():
@@ -241,17 +319,19 @@ def main():
     parser.add_argument('action', choices=['prepare', 'serve', 'extract', 'job'])
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--capture', type=Path)
+    parser.add_argument('--capsules')
+    parser.add_argument('--work', type=Path)
     parser.add_argument('--port', type=int, default=8162)
     args = parser.parse_args()
     os.umask(0o077)
     if args.action=='prepare':
-        prepare(args.root, args.capture)
+        prepare(args.root, args.capture, args.capsules)
         print(json.dumps({'ready': True}))
     elif args.action=='serve':
         serve(args.root, args.port)
     else:
         source = json.load(sys.stdin).get('source')
-        print(json.dumps(job(args.root, source) if args.action=='job' else extract(args.root, source)))
+        print(json.dumps(job(args.root, source, args.work) if args.action=='job' else extract(args.root, source, args.work)))
 
 
 if __name__=='__main__':
