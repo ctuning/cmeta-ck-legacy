@@ -1,0 +1,28 @@
+# config.h: snprintf and vsnprintf mapped to _snprintf and _vsnprintf only for MSVC before 2015,
+#   which had no C99 ones (the macros are an error with the Universal CRT)
+# audio_esd.c: without <unistd.h>, which nothing there uses: config.h leaves HAVE_UNISTD_H unset, so
+#   global.h makes isatty() a macro that breaks the header (Linux) or the header is missing (Windows)
+--- a/config.h
++++ b/config.h
+@@ -226,8 +226,10 @@
+ #define VERSION "0.14.2b"
+ 
+ #if defined(_WIN32) || defined(_WIN64)
++  #if defined(_MSC_VER) && _MSC_VER < 1900
+   #define snprintf _snprintf
+   #define vsnprintf _vsnprintf
++  #endif
+   #define strcasecmp _stricmp
+   #define strncasecmp _strnicmp
+ #endif
+--- a/audio_esd.c
++++ b/audio_esd.c
+@@ -25,7 +25,7 @@
+ 
+ # include "global.h"
+ 
+-# include <unistd.h>
++/* # include <unistd.h>    cMeta: not used here, and it conflicts with global.h */
+ # include <errno.h>
+ /* # include <esd.h> */
+ 

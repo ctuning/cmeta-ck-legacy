@@ -1,0 +1,16 @@
+artifact: c60332990fcc4a0d
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-15T19:45:17.607047+00:00'
+desc: 'cBench input image-ppm-0018 (cTuning MiDataSets, on demand): data.ppm.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- image
+- ppm

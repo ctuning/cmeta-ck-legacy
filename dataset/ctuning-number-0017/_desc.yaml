@@ -1,0 +1,24 @@
+authors: Grigori Fursin
+description: 'cBench input number-0017 (cTuning MiDataSets), from the capsule 20261115.ctuning-midatasets.number.tar.gz, downloaded on demand by task::get-ctuning-dataset.'
+
+# The files come from a capsule of the cTuning MiDataSets, unpacked once into the cache
+uses:
+  - task: get-ctuning-dataset,e4bfa3539ac64d5f
+    capsule: 'number'
+    entry: 'number-0017'
+result_from_ctx: '{{global.get-ctuning-dataset}}'
+
+# The files of the dataset in CK's order: the first is what a program gets by default.
+files:
+  - 'number.txt'
+
+# The number a program takes (CK: run_cmd_main.dataset_number), also in number.txt
+number: '512500'
+
+origin:
+  ck_repo: 'ctuning-datasets'
+  ck_entry: 'dataset:number-0017'
+  ck_uid: '04e9b49f2b0cccf2'
+  ck_created: '2012-10-22'
+  capsule: '20261115.ctuning-midatasets.number.tar.gz'
+  converted: '2026-11-15 by task::import-ck'

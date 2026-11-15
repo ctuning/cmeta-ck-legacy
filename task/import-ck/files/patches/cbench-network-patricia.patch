@@ -1,0 +1,22 @@
+# patricia_test.c: the node data is cleared with sizeof(struct MyNode); sizeof(*pm_data) of a void
+#   pointer is an error for MSVC and 1 byte for GCC (the rest of the node was left as malloc gave it)
+--- a/patricia_test.c
++++ b/patricia_test.c
+@@ -120,7 +120,7 @@
+ 		perror("Allocating p-trie mask's node data");
+ 		exit(EXIT_FAILURE);
+ 	}
+-	memset(pm->pm_data, 0, sizeof(*pm->pm_data));
++	memset(pm->pm_data, 0, sizeof(struct MyNode));
+ 	/*******
+ 	 *
+ 	 * Fill in default route/default node data here.
+@@ -172,7 +172,7 @@
+ 			perror("Allocating p-trie mask's node data");
+ 			exit(EXIT_FAILURE);
+ 		}
+-		memset(pm->pm_data, 0, sizeof(*pm->pm_data));
++		memset(pm->pm_data, 0, sizeof(struct MyNode));
+ 
+ 		/*
+ 		 * Assign a value to the IP address and mask field for this

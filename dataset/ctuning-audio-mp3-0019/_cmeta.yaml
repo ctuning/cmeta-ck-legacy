@@ -1,0 +1,16 @@
+artifact: 823c1dd03bc84197
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-15T19:44:53.075901+00:00'
+desc: 'cBench input audio-mp3-0019 (cTuning MiDataSets, on demand): data.mp3.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- audio
+- mp3

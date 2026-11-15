@@ -1,0 +1,17 @@
+PolyBench/GPU 1.0 (CUDA)
+Copyright (c) 2012 University of Delaware.
+Contact: Scott Grauer-Gray <sgrauerg@gmail.com>, Louis-Noel Pouchet <pouchet@cse.ohio-state.edu>
+
+Licence: none stated. The release (https://www.cs.colostate.edu/~pouchet/software/polybench/GPU/,
+public release of 03/19/12; also https://github.com/sgrauerg/polybenchGpu) and its sources carry only
+the copyright above and a request to cite:
+
+  Scott Grauer-Gray, Lifan Xu, Robert Searles, Sudhee Ayalasomayajula and John Cavazos.
+  Auto-tuning a High-Level Language Targeted to GPU Codes. Innovative Parallel Computing (InPar '12), 2012.
+
+Its CUDA codes are based on PolyBench 2.0 (the README of the GitHub repository), which was released
+on SourceForge under the GNU GPL v2.
+
+This program: the PolyBench/GPU 1.0 CUDA kernel as adapted for the Collective Knowledge framework by
+Grigori Fursin (xOpenME timers, CT_REPEAT_MAIN, the GPU chosen by CK_COMPUTE_DEVICE_ID; ctuning/ck-ml),
+with the changes of cmeta-ck-legacy listed in the program's README.

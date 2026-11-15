@@ -1,0 +1,16 @@
+PolyBench/C 3.2
+Copyright (c) 2011-2012 the Ohio State University.
+Contact: Louis-Noel Pouchet <pouchet@cse.ohio-state.edu>
+Authors (AUTHORS of the release): Louis-Noel Pouchet, Uday Bondugula
+
+Licence: PolyBench/C 3.2 was released in March 2012 on SourceForge
+(https://sourceforge.net/projects/polybench/, polybench-c-3.2.tar.gz), where the PolyBench project is
+licensed under the GNU General Public License version 2 (GPLv2). The release itself carries no
+licence file - its README has only the copyright line above. The text of the GPLv2 is in COPYING.
+
+PolyBench/C 4.1 and later carry another licence, the Ohio State University Software Distribution
+License (BSD-style); it does not apply to these 3.2 sources.
+
+This program: the PolyBench/C 3.2 kernel as adapted for the Collective Knowledge framework by
+Grigori Fursin (xOpenME timers, CT_REPEAT_MAIN; ctuning/ck-ml), with the changes of cmeta-ck-legacy
+listed in the program's README.

@@ -1,0 +1,24 @@
+authors: Grigori Fursin
+description: 'CK paper input image-jpg-fgg-office-night-gray (the office webcam snapshots of the CK paper repository), from the capsule 20261115.ck-office-snapshots.datasets.tar.gz, downloaded on demand by task::get-ctuning-dataset.'
+
+# The files come from a capsule of the office webcam snapshots of the CK paper repository, unpacked once into the cache
+uses:
+  - task: get-ctuning-dataset,e4bfa3539ac64d5f
+    capsule: 'ck-office-snapshots'
+    entry: 'image-jpg-fgg-office-night-gray'
+result_from_ctx: '{{global.get-ctuning-dataset}}'
+
+# The files of the dataset in CK's order: the first is what a program gets by default.
+files:
+  - 'data_orig.jpg'
+  - 'README.txt'
+  - 'data.bin'
+  - 'data_orig.ppm'
+
+origin:
+  ck_repo: 'reproduce-ck-paper'
+  ck_entry: 'dataset:image-jpg-fgg-office-night-gray'
+  ck_uid: 'c9da12c288148ab9'
+  ck_created: '2016-02-13'
+  capsule: '20261115.ck-office-snapshots.datasets.tar.gz'
+  converted: '2026-11-15 by task::import-ck'

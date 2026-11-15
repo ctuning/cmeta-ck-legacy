@@ -1,0 +1,17 @@
+authors: Grigori Fursin
+description: 'cBench input number-0001 (cTuning MiDataSets), converted from the CK dataset number-0001.'
+
+# The files of the dataset in CK's order: the first is what a program gets by default.
+files:
+  - 'number.txt'
+
+# Properties recorded in CK (cm_properties).
+ck_properties: {"run_time": {"run_cmd_main": {"dataset_number": "1125000"}}}
+
+origin:
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'dataset:number-0001'
+  ck_uid: '39b6c4877b388cf5'
+  ck_created: '2012-10-22'
+  ck_description: ''
+  converted: '2026-11-15 by task::import-ck'

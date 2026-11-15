@@ -1,0 +1,26 @@
+# quantize-pvt.c: the MSVC inline assembly (x87) only for 32-bit x86 (_M_IX86); 64-bit MSVC has no
+#   inline assembler and takes the C code, as every other compiler does
+# id3tag.c: the unset genre is the byte 255 put into the 1-byte field; strcpy of "ÿ" (two bytes
+#   in the UTF-8 CK source, and the NUL) wrote past it, which macOS stops (_FORTIFY_SOURCE: SIGTRAP)
+--- a/quantize-pvt.c
++++ b/quantize-pvt.c
+@@ -890,7 +890,7 @@
+ #if (defined(__GNUC__) && defined(__i386__))
+ #define USE_GNUC_ASM
+ #endif
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) && defined(_M_IX86)
+ #define USE_MSC_ASM
+ #endif
+ 
+--- a/id3tag.c
++++ b/id3tag.c
+@@ -34,7 +34,7 @@
+ 	strcpy( tag->album, "");
+ 	strcpy( tag->year, "");    
+ 	strcpy( tag->comment, "");
+-	strcpy( tag->genre, "ÿ");	/* unset genre */
++	tag->genre[0] = (char) 0xFF;	/* unset genre (cMeta: was a strcpy past the 1-byte field) */
+ 	tag->track = 0;
+ 
+ 	tag->valid = 0;		/* not ready for writing*/

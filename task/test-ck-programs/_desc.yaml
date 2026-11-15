@@ -1,0 +1,32 @@
+authors: Grigori Fursin
+description: Run every command of the converted CK programs on one target and compare the outputs of several targets.
+cache: false
+store_global: false
+
+# The programs and the repository they are taken from
+default_programs: cbench-*,polybench-cpu-*
+default_repo: cmeta-ck-legacy
+
+# Files of a build folder that are not outputs to compare (times change from run to run)
+not_compared:
+  - tmp-ck-timer.json
+
+# Outputs that hold something of the host or of the moment (a path, a time): named by the
+# comparison, not compared. Key: "<program>" or "<program> <command>"; value: {file: why}.
+host_dependent:
+  cbench-consumer-lame:
+    tmp-output2.tmp: progress and times on standard error
+  cbench-consumer-mad:
+    tmp-output2.tmp: progress and times on standard error
+  cbench-consumer-tiff2bw:
+    tmp-output.tmp: the TIFF ImageDescription holds the path of the input file
+  cbench-consumer-tiff2median:
+    tmp-output.tmp: the TIFF ImageDescription holds the path of the input file
+  cbench-telecom-crc32:
+    tmp-output1.tmp: the path of the input file is printed
+  cbench-security-pgp encode:
+    tmp-output.tmp: the signature holds the time it was made
+  # The CPU reference of the CK versions is commented out: the check compares the GPU's result with an
+  # array never computed (malloc), and prints the GPU's name
+  polybench-cuda-*:
+    tmp-output1.tmp: the GPU's name, and a check against an array the CK version never computes

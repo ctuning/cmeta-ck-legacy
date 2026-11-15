@@ -1,0 +1,106 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'cBench (MiBench-based, cTuning)'
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'program:cbench-office-stringsearch2'
+  ck_uid: 'de64f4757a409aaf'
+  ck_created: '2012-09-23'
+  converted: '2026-11-15 by task::import-ck'
+  # What was changed in the CK sources, and why
+  patches:
+    - 'fgg_search.c: the tables of the lines of both files as long as the files (malloc after counting); they were 30000 entries each on the stack, and inputs of the MiDataSets have more lines (txt-0004: 40001 search strings), which crashed the program; the lines are counted with the buffer size they are read with, so that both passes agree'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'BSD 4-clause (University of California), in the source'
+  spdx: 'BSD-4-Clause-UC'
+  file: 'src/fgg_search.c'
+
+###################################################################################################
+local_vars:
+  lang: c
+
+  src_file_names:
+    - 'fgg_search.c'
+
+  target_file_name: 'office-stringsearch2'
+
+  input_files:
+    data: '{{local.dataset.path}}'
+
+  output_files:
+    - 'tmp-ck-timer.json'
+    - 'tmp-output.tmp'
+
+  result_files:
+    stats-xopenme: tmp-ck-timer.json
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+  ck_dataset_more_files: true
+
+###################################################################################################
+params:
+  compile:
+    d:
+      XOPENME:
+
+params_os:
+  linux:
+    compile:
+      lib_names:
+        - m
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          - task: setup,a2f9b61079ce4333
+            name: lib-xopenme,c7b96678a7734510
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          # Android: the libraries of the NDK sysroot
+          - task: setup,a2f9b61079ce4333
+            if: '"android-cpu" in {{global.target.compute|$[]}}'
+            name: lib-sysroot-android,cdc22b7617f54f2c
+            with:
+              static: '{{local.params.compile.static|$None}}'
+              lib_names:
+                - dl
+                - m
+                - z
+              dynamic_libs:
+                - c++_shared
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - task: dataset,30e20c7489f14f84
+            dataset_tags: doc,txt
+            name: '{{params.dataset|$None}}'
+            filename: '{{params.dataset_file|data.txt}}'
+
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+      - match:
+          task: setup-run,148f6c1fdb4247df
+        update:
+          cmd_main: '{qinput_files.data} {qinput_files.data1} tmp-output.tmp {{local.ck_redirects|}}'

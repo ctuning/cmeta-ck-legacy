@@ -1,0 +1,49 @@
+# system.h, system.c: no strlwr of its own with MSVC, whose C library has it (two declarations
+#   of one function are an error)
+# gettime.c: its stand-in gettimeofday() only on Windows (WINDOWS), with struct timeval from
+#   <winsock2.h>; elsewhere the C library has the function, and the old definition conflicts with
+#   the prototype of today's headers (glibc: void *tz)
+--- a/system.h
++++ b/system.h
+@@ -63,7 +63,7 @@
+ #define ttynorm()	/* nothing */
+ #endif
+ 
+-#if !defined(MSDOS) && !defined(ATARI)
++#if !defined(MSDOS) && !defined(ATARI) && !defined(_MSC_VER)
+ char *strlwr(char *);
+ #endif
+ 
+--- a/system.c
++++ b/system.c
+@@ -1778,7 +1778,7 @@
+ }					/* Scan-Codes in Bits 16..23 */
+ #endif /* ATARI */
+ 
+-#if !defined(MSDOS) && !defined(ATARI)
++#if !defined(MSDOS) && !defined(ATARI) && !defined(_MSC_VER)
+ #include <ctype.h>
+ #include "charset.h"
+ char *strlwr(char *s)
+--- a/gettime.c
++++ b/gettime.c
+@@ -7,10 +7,13 @@
+ #include <sys/types.h>
+ #if defined(WINDOWS)
+ #include <time.h>
++#include <winsock2.h>
+ #else
+ #include <sys/time.h>
+ #endif
+ 
++/* cMeta: only where the C library has no gettimeofday() */
++#if defined(WINDOWS)
+ gettimeofday (tp, tzp)
+      struct timeval *tp;
+      struct timezone *tzp;
+@@ -22,4 +25,5 @@
+   tp->tv_sec = time ((long *)0);
+   tp->tv_usec = 0;
+ }
++#endif
+ 

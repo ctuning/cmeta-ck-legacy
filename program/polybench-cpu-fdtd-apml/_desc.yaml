@@ -1,0 +1,117 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'PolyBench/C 3.2 (Ohio State University), CK version'
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'program:polybench-cpu-fdtd-apml'
+  ck_uid: '4a6e8298ccb89c54'
+  ck_created: '2012-07-08'
+  converted: '2026-11-15 by task::import-ck'
+  # What was changed in the CK sources, and why
+  patches:
+    - 'fdtd-apml.h: the printf format of DATA_TYPE by token pasting (MSVC refuses "#if DATA_TYPE == double")'
+    - 'fdtd-apml.c: print_array writes the arrays into tmp-ck-output-dump.txt (not the standard streams)'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'GNU GPL v2 (PolyBench/C 3.2, copyright 2011-2012 the Ohio State University; the licence of the PolyBench project on SourceForge)'
+  spdx: 'GPL-2.0-only'
+  file: 'src/LICENSE.txt'
+
+###################################################################################################
+local_vars:
+  lang: c
+
+  src_file_names:
+    - 'fdtd-apml.c'
+
+  target_file_name: 'fdtd-apml'
+
+  output_files:
+    - 'tmp-ck-timer.json'
+
+  result_files:
+    stats-xopenme: tmp-ck-timer.json
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+
+  # PolyBench (hooks of template-ck-program): CK's sizes, replaced by the header's with --compile.size=<mini|
+  # small|standard|large|extralarge>; the arrays dumped into this file (--compile.dump=yes|no)
+  ck_size_vars: ["CXM", "CYM", "CZ"]
+  ck_dump_file: tmp-ck-output-dump.txt
+
+  # Where CK measured the time goes (hot_functions)
+  ck_hot_functions:
+    default: ["kernel_fdtd_apml"]
+
+###################################################################################################
+params:
+  compile:
+    d:
+      CXM: '16'
+      CYM: '16'
+      CZ: '16'
+      DATA_TYPE: 'double'
+      POLYBENCH_DUMP_ARRAYS: 'YES'
+      POLYBENCH_PADDING_FACTOR: '0'
+      XOPENME:
+
+params_os:
+  linux:
+    compile:
+      lib_names:
+        - m
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          - task: setup,a2f9b61079ce4333
+            name: lib-polybench,70349e61a532455d
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          - task: setup,a2f9b61079ce4333
+            name: lib-xopenme,c7b96678a7734510
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          # Android: the libraries of the NDK sysroot
+          - task: setup,a2f9b61079ce4333
+            if: '"android-cpu" in {{global.target.compute|$[]}}'
+            name: lib-sysroot-android,cdc22b7617f54f2c
+            with:
+              static: '{{local.params.compile.static|$None}}'
+              lib_names:
+                - dl
+                - m
+                - z
+              dynamic_libs:
+                - c++_shared
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+      - match:
+          task: setup-run,148f6c1fdb4247df
+        update:
+          cmd_main: '{{local.ck_redirects|}}'

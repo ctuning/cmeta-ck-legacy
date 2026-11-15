@@ -1,0 +1,103 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'PolyBench/GPU 1.0 CUDA (Ohio State University, University of Delaware), CK version'
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'program:polybench-cuda-gramschm'
+  ck_uid: 'efa9fe4cc67b394f'
+  ck_created: '2012-07-08'
+  converted: '2026-11-15 by task::import-ck'
+  # What was changed in the CK sources, and why
+  patches:
+    - 'gramschmidt.cu: cudaDeviceSynchronize() for cudaThreadSynchronize(), which CUDA 13 removed (the same since CUDA 4)'
+    - 'gramschmidt.cu: the compute mode of the GPU from cudaDeviceGetAttribute, as CUDA 13 removed cudaDeviceProp::computeMode'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its CUDA codes derive from PolyBench 2.0, GPLv2)'
+  file: 'src/NOTICE.txt'
+
+###################################################################################################
+local_vars:
+  lang: cuda
+
+  src_file_names:
+    - 'gramschmidt.cu'
+
+  target_file_name: 'gramschm'
+
+  output_files:
+    - 'tmp-ck-timer.json'
+
+  result_files:
+    stats-xopenme: tmp-ck-timer.json
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+
+  # Where CK measured the time goes (hot_functions)
+  ck_hot_functions:
+    default: ["kernel_gramschmidt"]
+
+###################################################################################################
+params:
+  compute: cuda
+  compile:
+    d:
+      DATA_TYPE: 'float'
+      DIM_THREAD_BLOCK_X: '128'
+      DIM_THREAD_BLOCK_Y: '1'
+      NI: '128'
+      NJ: '128'
+      XOPENME:
+
+# nvcc builds for the architecture of the GPU it finds
+use:
+  nvcc:
+    with:
+      arch_flags: True
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          - task: setup,a2f9b61079ce4333
+            name: lib-polybench,70349e61a532455d
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          - task: setup,a2f9b61079ce4333
+            name: lib-xopenme,c7b96678a7734510
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          # The CUDA runtime: its library folder on the run-time path (a CUDA of the cMeta cache
+          # is not on the system's)
+          - task: setup,a2f9b61079ce4333
+            name: lib-cuda,ac9daedec465409e
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+      - match:
+          task: setup-run,148f6c1fdb4247df
+        update:
+          cmd_main: '{{local.ck_redirects|}}'

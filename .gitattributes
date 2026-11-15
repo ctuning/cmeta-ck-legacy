@@ -1,0 +1,14 @@
+# Line ends
+
+# The files of the programs and datasets converted from CK, their licence texts and the patches are kept
+# byte for byte, as CK had them and as they were tested (some sources have Windows line ends): no
+# conversion when they are committed or checked out, whatever core.autocrlf says. A program's input
+# with other line ends would give other outputs.
+program/*/src/** -text
+dataset/*/files/** -text
+task/import-ck/files/licenses/** -text
+task/import-ck/files/patches/** -text
+
+# Scripts: CRLF for cmd.exe (it can misread the labels of a batch file with LF line ends), LF for sh
+*.bat text eol=crlf
+*.sh text eol=lf

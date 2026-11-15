@@ -1,0 +1,44 @@
+# fgg_search.c: the tables of the lines of both files as long as the files (malloc after counting);
+#   they were 30000 entries each on the stack, and inputs of the MiDataSets have more lines (txt-0004:
+#   40001 search strings), which crashed the program; the lines are counted with the buffer size they
+#   are read with, so that both passes agree
+--- a/fgg_search.c
++++ b/fgg_search.c
+@@ -89,8 +89,8 @@
+ 
+       long size1=0;
+       long size2=0;
+-      char* search_strings[30000];
+-      char* find_strings[30000];
++      char** search_strings;	/* cMeta: as many as the lines of the files (was 30000 each) */
++      char** find_strings;
+       long i1=0;
+       long i2=0;
+       char* a1x;
+@@ -122,7 +122,7 @@
+ 
+       //counting file1
+       i1=0;
+-      while ((fgets(str_misc, 1024, fmisc1)!=NULL) && (feof(fmisc1)==0))
++      while ((fgets(str_misc, 1023, fmisc1)!=NULL) && (feof(fmisc1)==0))
+       {
+         i1++;
+ 	size1+=strlen(str_misc)+1;
+@@ -130,7 +130,7 @@
+ 
+       //counting file2
+       i2=0;
+-      while ((fgets(str_misc, 1024, fmisc2)!=NULL) && (feof(fmisc2)==0))
++      while ((fgets(str_misc, 1023, fmisc2)!=NULL) && (feof(fmisc2)==0))
+       {
+         i2++;
+ 	size2+=strlen(str_misc)+1;
+@@ -143,6 +143,8 @@
+ 
+       a1x=(char*) malloc(sizeof(char)*size1);
+       a2x=(char*) malloc(sizeof(char)*size2);
++      search_strings=(char**) malloc(sizeof(char*)*(i1+1));
++      find_strings=(char**) malloc(sizeof(char*)*(i2+1));
+ 
+       if ((fmisc1=fopen(argv[1],"rt"))==NULL)
+       {

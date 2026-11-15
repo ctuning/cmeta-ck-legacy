@@ -1,0 +1,25 @@
+{
+  "artifact": "af6030b43dee4546",
+  "authors": "Grigori Fursin",
+  "category": "program,22788f3c30d04e6d",
+  "constraints": {
+    "supported_compute": [
+      "android-cpu",
+      "cpu"
+    ]
+  },
+  "creation_timestamp": "2026-11-15T19:11:07.208292+00:00",
+  "desc": "cBench (MiBench-based, cTuning): security-rijndael, converted from the CK program cbench-security-rijndael.",
+  "generator": {
+    "agent": "Claude Code 2.1.322",
+    "by": "Grigori Fursin",
+    "method": "agent",
+    "via": "cmeta 0.42.0"
+  },
+  "tags": [
+    "small",
+    "cbench",
+    "lang-c",
+    "crowd-tuning"
+  ]
+}

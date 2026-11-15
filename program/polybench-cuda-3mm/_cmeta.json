@@ -1,0 +1,23 @@
+{
+  "artifact": "7fa15f0bce534bba",
+  "authors": "Grigori Fursin",
+  "category": "program,22788f3c30d04e6d",
+  "constraints": {
+    "supported_compute": [
+      "cuda"
+    ]
+  },
+  "creation_timestamp": "2026-11-15T20:44:19.161013+00:00",
+  "desc": "PolyBench/GPU 1.0 CUDA (Ohio State University, University of Delaware), CK version: 3mm, converted from the CK program polybench-cuda-3mm.",
+  "generator": {
+    "agent": "Claude Code 2.1.322",
+    "by": "Grigori Fursin",
+    "method": "agent",
+    "via": "cmeta 0.42.0"
+  },
+  "tags": [
+    "polybench",
+    "lang-c-cuda",
+    "cuda"
+  ]
+}

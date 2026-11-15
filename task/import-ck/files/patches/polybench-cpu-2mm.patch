@@ -1,0 +1,12 @@
+# 2mm.c: print_array printed D[i][j] with j never set (undefined behaviour); it prints the diagonal, D[i][i]
+--- a/2mm.c
++++ b/2mm.c
+@@ -88,7 +88,7 @@
+ 
+   for (i = 0; i < n; i++)
+   {
+-    fprintf (ck_dump, DATA_PRINTF_MODIFIER, D[i][j]);
++    fprintf (ck_dump, DATA_PRINTF_MODIFIER, D[i][i]);
+     fprintf (ck_dump, "\n");
+   }
+ 

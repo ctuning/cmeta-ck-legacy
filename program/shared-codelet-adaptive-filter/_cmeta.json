@@ -1,0 +1,23 @@
+{
+  "artifact": "d94954c9c9b84852",
+  "authors": "Grigori Fursin",
+  "category": "program,22788f3c30d04e6d",
+  "constraints": {
+    "supported_compute": [
+      "android-cpu",
+      "cpu"
+    ]
+  },
+  "creation_timestamp": "2026-11-15T21:00:27.218293+00:00",
+  "desc": "Codelets of the CK paper repository (reproduce-ck-paper): edge detection of an image: adaptive-filter, converted from the CK program shared-codelet-adaptive-filter.",
+  "generator": {
+    "agent": "Claude Code 2.1.322",
+    "by": "Grigori Fursin",
+    "method": "agent",
+    "via": "cmeta 0.42.0"
+  },
+  "tags": [
+    "demo",
+    "lang-c"
+  ]
+}

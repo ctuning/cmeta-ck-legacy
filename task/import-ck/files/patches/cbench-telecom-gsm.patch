@@ -1,0 +1,15 @@
+# config.h: without unistd.h and utime on Windows (WINDOWS), which has neither (toast.c already
+#   leaves fchmod and fchown out there)
+--- a/config.h
++++ b/config.h
+@@ -24,8 +24,10 @@
+ #define	HAS_STRING_H 	1		/* /usr/include/string.h 	*/
+ /*efine	HAS_STRINGS_H	1		/* /usr/include/strings.h 	*/
+ 
++#ifndef WINDOWS
+ #define	HAS_UNISTD_H	1		/* /usr/include/unistd.h	*/
+ #define	HAS_UTIME	1		/* POSIX utime(path, times)	*/
++#endif
+ /*efine	HAS_UTIMES	1		/* use utimes()	syscall instead	*/
+ #define	HAS_UTIME_H	1		/* UTIME header file		*/
+ /*efine	HAS_UTIMBUF	1		/* struct utimbuf		*/

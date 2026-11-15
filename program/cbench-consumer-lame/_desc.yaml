@@ -1,0 +1,141 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'cBench (MiBench-based, cTuning)'
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'program:cbench-consumer-lame'
+  ck_uid: '5ae87ab32641f495'
+  ck_created: '2012-09-23'
+  converted: '2026-11-15 by task::import-ck'
+  # What was changed in the CK sources, and why
+  patches:
+    - 'quantize-pvt.c: the MSVC inline assembly (x87) only for 32-bit x86 (_M_IX86); 64-bit MSVC has no inline assembler and takes the C code, as every other compiler does'
+    - 'id3tag.c: the unset genre is the byte 255 put into the 1-byte field; strcpy of "ÿ" (two bytes in the UTF-8 CK source, and the NUL) wrote past it, which macOS stops (_FORTIFY_SOURCE: SIGTRAP)'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'LAME 3.70: GNU Library GPL v2 or later (lame.c ...), and GNU GPL v2 or later for quantize.c and vbrquantize.c'
+  spdx: 'LGPL-2.0-or-later AND GPL-2.0-or-later'
+  file: 'src/LICENSE'
+
+###################################################################################################
+local_vars:
+  lang: c
+
+  src_file_names:
+    - 'amiga_mpega.c'
+    - 'brhist.c'
+    - 'common.c'
+    - 'dct64_i386.c'
+    - 'decode_i386.c'
+    - 'fft.c'
+    - 'formatBitstream.c'
+    - 'get_audio.c'
+    - 'gpkplotting.c'
+    - 'gtkanal.c'
+    - 'id3tag.c'
+    - 'ieeefloat.c'
+    - 'interface.c'
+    - 'l3bitstream.c'
+    - 'lame.c'
+    - 'layer3.c'
+    - 'ctuning-rtl.c'
+    - 'main.c'
+    - 'mainmpglib.c'
+    - 'newmdct.c'
+    - 'parse.c'
+    - 'portableio.c'
+    - 'psymodel.c'
+    - 'quantize-pvt.c'
+    - 'quantize.c'
+    - 'reservoir.c'
+    - 'tabinit.c'
+    - 'tables.c'
+    - 'takehiro.c'
+    - 'timestatus.c'
+    - 'util.c'
+    - 'vbrquantize.c'
+    - 'VbrTag.c'
+    - 'version.c'
+
+  target_file_name: 'consumer-lame'
+
+  input_files:
+    data: '{{local.dataset.path}}'
+
+  output_files:
+    - 'tmp-ck-timer.json'
+    - 'tmp-output.tmp'
+
+  result_files:
+    stats-xopenme: tmp-ck-timer.json
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+
+###################################################################################################
+params:
+  compile:
+    d:
+      LAMEPARSE:
+      LAMESNDFILE:
+      XOPENME:
+
+params_os:
+  linux:
+    compile:
+      lib_names:
+        - m
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          - task: setup,a2f9b61079ce4333
+            name: lib-xopenme,c7b96678a7734510
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          # Android: the libraries of the NDK sysroot
+          - task: setup,a2f9b61079ce4333
+            if: '"android-cpu" in {{global.target.compute|$[]}}'
+            name: lib-sysroot-android,cdc22b7617f54f2c
+            with:
+              static: '{{local.params.compile.static|$None}}'
+              lib_names:
+                - dl
+                - m
+                - z
+              dynamic_libs:
+                - c++_shared
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - task: dataset,30e20c7489f14f84
+            dataset_tags: wav,audio
+            name: '{{params.dataset|$None}}'
+            filename: '{{params.dataset_file|$None}}'
+
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+      - match:
+          task: setup-run,148f6c1fdb4247df
+        update:
+          cmd_main: '{qinput_files.data} tmp-output.tmp {{local.ck_redirects|}}'

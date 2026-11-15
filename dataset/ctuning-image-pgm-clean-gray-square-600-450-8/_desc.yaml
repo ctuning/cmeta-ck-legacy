@@ -1,0 +1,17 @@
+authors: Grigori Fursin
+description: 'cBench input image-pgm-clean-gray-square-600-450-8 (cTuning MiDataSets), converted from the CK dataset image-pgm-clean-gray-square-600-450-8.'
+
+# The files of the dataset in CK's order: the first is what a program gets by default.
+files:
+  - 'data.pgm'
+
+# Properties recorded in CK (cm_properties).
+ck_properties: {"color_depth": "8", "gray": "yes", "height": "450", "image_type": "clean square", "type": "image", "width": "600"}
+
+origin:
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'dataset:image-pgm-clean-gray-square-600-450-8'
+  ck_uid: 'c5a378cde441bbb7'
+  ck_created: '2012-04-12'
+  ck_description: 'cDatasets/MiDataSets for cBench, see http://cTuning.org'
+  converted: '2026-11-15 by task::import-ck'

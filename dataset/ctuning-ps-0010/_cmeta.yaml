@@ -1,0 +1,16 @@
+artifact: 1d2d12daa46a46e8
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-15T19:45:36.591745+00:00'
+desc: 'cBench input ps-0010 (cTuning MiDataSets, on demand): data.ps.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- doc
+- ps

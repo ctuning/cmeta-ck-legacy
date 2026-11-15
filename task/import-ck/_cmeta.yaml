@@ -1,0 +1,18 @@
+artifact: a7e4366502b54434
+category: task,c36be4b9314a45e0
+tags:
+  - ck
+  - import
+  - legacy
+  - convert
+authors: Grigori Fursin
+creation_timestamp: '2026-11-15T18:50:58.342528+00:00'
+generator:
+  method: agent
+  agent: Claude Code 2.1.322
+  via: cmeta 0.42.0
+  by: Grigori Fursin
+desc: "Convert programs and datasets of the Collective Knowledge (CK) format into cMeta program and dataset artifacts (cBench, PolyBench/C and their inputs)."
+uses_categories:
+  program: program,22788f3c30d04e6d
+  dataset: dataset,fdd7c5ded7464161

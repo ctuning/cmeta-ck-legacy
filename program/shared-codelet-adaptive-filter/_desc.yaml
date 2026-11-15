@@ -1,0 +1,98 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'Codelets of the CK paper repository (reproduce-ck-paper): edge detection of an image'
+  ck_repo: 'ctuning/reproduce-ck-paper'
+  ck_entry: 'program:shared-codelet-adaptive-filter'
+  ck_uid: '24c94b0e0b26640a'
+  ck_created: '2015-01-29'
+  converted: '2026-11-15 by task::import-ck'
+  # What was changed in the CK sources, and why
+  patches:
+    - 'filter.c: <omp.h> only in an OpenMP build (_OPENMP): the program calls nothing of OpenMP, its "#pragma omp parallel for" is ignored without -fopenmp, and Apple clang has no <omp.h>'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'filter.c: UTDSP edge detection (copyright 1992 Mazen A.R. Saghir, University of Toronto; no licence stated), changed by Grigori Fursin; the CK paper repository: BSD-3-Clause'
+  file: 'src/LICENSE.txt'
+
+###################################################################################################
+local_vars:
+  lang: c
+
+  src_file_names:
+    - 'filter.c'
+    - 'filter_codelet_day.c'
+    - 'filter_codelet_night.c'
+
+  target_file_name: 'adaptive-filter'
+
+  input_files:
+    data: '{{local.dataset.path}}'
+
+  output_files:
+    - 'image_output.bin'
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+    CT_TIME: '{{local.params.time|day}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+  ck_legacy_c: true
+
+###################################################################################################
+params:
+  compile:
+    d: {}
+
+params_os:
+  linux:
+    compile:
+      lib_names:
+        - m
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          # Android: the libraries of the NDK sysroot
+          - task: setup,a2f9b61079ce4333
+            if: '"android-cpu" in {{global.target.compute|$[]}}'
+            name: lib-sysroot-android,cdc22b7617f54f2c
+            with:
+              static: '{{local.params.compile.static|$None}}'
+              lib_names:
+                - dl
+                - m
+                - z
+              dynamic_libs:
+                - c++_shared
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - task: dataset,30e20c7489f14f84
+            dataset_tags: image,raw-bin,rgb
+            name: '{{params.dataset|$None}}'
+            filename: '{{params.dataset_file|$None}}'
+
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+      - match:
+          task: setup-run,148f6c1fdb4247df
+        update:
+          cmd_main: '{qinput_files.data} {{local.ck_redirects|}}'

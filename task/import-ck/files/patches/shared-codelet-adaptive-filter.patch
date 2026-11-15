@@ -1,0 +1,15 @@
+# filter.c: <omp.h> only in an OpenMP build (_OPENMP): the program calls nothing of OpenMP, its
+#   "#pragma omp parallel for" is ignored without -fopenmp, and Apple clang has no <omp.h>
+--- a/filter.c
++++ b/filter.c
+@@ -31,7 +31,9 @@
+ 
+     Copyright (c) 1992 -- Mazen A.R. Saghir -- University of Toronto */
+ 
+-#include <omp.h>
++#ifdef _OPENMP
++#include <omp.h>	/* cMeta: only in an OpenMP build (Apple clang has no omp.h) */
++#endif
+ #include <stdio.h>
+ #include <stdlib.h>
+ 

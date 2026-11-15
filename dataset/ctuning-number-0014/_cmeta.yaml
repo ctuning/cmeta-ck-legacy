@@ -1,0 +1,16 @@
+artifact: ecd1bafc53be4c0c
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-15T19:45:29.843351+00:00'
+desc: 'cBench input number-0014 (cTuning MiDataSets, on demand): number.txt.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- number
+- cmd

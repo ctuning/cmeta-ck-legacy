@@ -1,0 +1,14 @@
+authors: Grigori Fursin
+description: 'cBench input benc-0001 (cTuning MiDataSets), converted from the CK dataset benc-0001.'
+
+# The files of the dataset in CK's order: the first is what a program gets by default.
+files:
+  - 'data.benc'
+
+origin:
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'dataset:benc-0001'
+  ck_uid: '8fd3778e7dc74f0f'
+  ck_created: '2012-04-12'
+  ck_description: 'cDatasets/MiDataSets for cBench, see http://cTuning.org'
+  converted: '2026-11-15 by task::import-ck'

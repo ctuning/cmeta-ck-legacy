@@ -1,0 +1,178 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'cBench (MiBench-based, cTuning)'
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'program:cbench-security-pgp'
+  ck_uid: '4ff1b558b4be8853'
+  ck_created: '2012-09-23'
+  converted: '2026-11-15 by task::import-ck'
+  # What was changed in the CK sources, and why
+  patches:
+    - 'system.h, system.c: no strlwr of its own with MSVC, whose C library has it (two declarations of one function are an error)'
+    - 'gettime.c: its stand-in gettimeofday() only on Windows (WINDOWS), with struct timeval from <winsock2.h>; elsewhere the C library has the function, and the old definition conflicts with the prototype of today''s headers (glibc: void *tz)'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'PGP 2.6.3i licence: "free for use internationally"; the RSA and IDEA patents it names have expired'
+  file: 'src/LICENSE'
+
+###################################################################################################
+local_vars:
+  lang: c
+
+  src_file_names:
+    - 'armor.c'
+    - 'charset.c'
+    - 'config.c'
+    - 'crypto.c'
+    - 'fileio.c'
+    - 'genprime.c'
+    - 'getopt.c'
+    - 'gettime.c'
+    - 'idea.c'
+    - 'keyadd.c'
+    - 'keymaint.c'
+    - 'keymgmt.c'
+    - 'language.c'
+    - 'md5.c'
+    - 'mdfile.c'
+    - 'more.c'
+    - 'mpiio.c'
+    - 'mpilib.c'
+    - 'mpw32asm.c'
+    - 'noise.c'
+    - 'passwd.c'
+    - 'pgp.c'
+    - 'random.c'
+    - 'randpool.c'
+    - 'rsagen.c'
+    - 'rsaglue1.c'
+    - 'sleep.c'
+    - 'system.c'
+    - 'zbits.c'
+    - 'zdeflate.c'
+    - 'zfile_io.c'
+    - 'zglobals.c'
+    - 'zinflate.c'
+    - 'zip.c'
+    - 'zipup.c'
+    - 'ztrees.c'
+    - 'zunzip.c'
+
+  target_file_name: 'security-pgp'
+
+  input_files:
+    data: '{{local.dataset.path}}'
+
+  output_files:
+    - 'tmp-ck-timer.json'
+
+  result_files:
+    stats-xopenme: tmp-ck-timer.json
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+  ck_legacy_c: true
+  ck_run_files: ["pubring.pgp", "secring.pgp"]
+
+  # Where CK measured the time goes (hot_functions)
+  ck_hot_functions:
+    decode: ["inflate_codes", "smith_modmult", "getpubuserid", "wipeout", "huft_build", "MD5Transform"]
+    encode: ["smith_modmult", "mp_mod", "MD5Transform", "mp_mult"]
+
+###################################################################################################
+params:
+  compile:
+    d:
+      PORTABLE:
+      XOPENME:
+
+params_os:
+  linux:
+    compile:
+      lib_names:
+        - m
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          - task: setup,a2f9b61079ce4333
+            name: lib-xopenme,c7b96678a7734510
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          # Android: the libraries of the NDK sysroot
+          - task: setup,a2f9b61079ce4333
+            if: '"android-cpu" in {{global.target.compute|$[]}}'
+            name: lib-sysroot-android,cdc22b7617f54f2c
+            with:
+              static: '{{local.params.compile.static|$None}}'
+              lib_names:
+                - dl
+                - m
+                - z
+              dynamic_libs:
+                - c++_shared
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - task: dataset,30e20c7489f14f84
+            dataset_tags: crypto,pgp
+            name: '{{params.dataset|$None}}'
+            filename: '{{params.dataset_file|$None}}'
+
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+###################################################################################################
+# The commands of the CK program (--cmd=<name>)
+updates_cmd:
+  decode:
+    run:
+      uses:
+        - match:
+            task: dataset,30e20c7489f14f84
+          update:
+            dataset_tags: crypto,pgp
+            filename: '{{params.dataset_file|$None}}'
+        - match:
+            task: setup-run,148f6c1fdb4247df
+          update:
+            cmd_main: '{qinput_files.data} -o tmp-output.tmp {{local.ck_redirects|}}'
+    local_vars:
+      +output_files:
+        - 'tmp-output.tmp'
+
+  encode:
+    run:
+      uses:
+        - match:
+            task: dataset,30e20c7489f14f84
+          update:
+            dataset_tags: doc,txt
+            filename: '{{params.dataset_file|data.txt}}'
+        - match:
+            task: setup-run,148f6c1fdb4247df
+          update:
+            cmd_main: '-s {qinput_files.data} test -o tmp-output.tmp {{local.ck_redirects|}}'
+    local_vars:
+      +output_files:
+        - 'tmp-output.tmp'

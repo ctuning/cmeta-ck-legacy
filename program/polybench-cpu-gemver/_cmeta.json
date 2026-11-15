@@ -1,0 +1,24 @@
+{
+  "artifact": "37d116155c5a4a28",
+  "authors": "Grigori Fursin",
+  "category": "program,22788f3c30d04e6d",
+  "constraints": {
+    "supported_compute": [
+      "android-cpu",
+      "cpu"
+    ]
+  },
+  "creation_timestamp": "2026-11-15T19:11:09.515386+00:00",
+  "desc": "PolyBench/C 3.2 (Ohio State University), CK version: gemver, converted from the CK program polybench-cpu-gemver.",
+  "generator": {
+    "agent": "Claude Code 2.1.322",
+    "by": "Grigori Fursin",
+    "method": "agent",
+    "via": "cmeta 0.42.0"
+  },
+  "tags": [
+    "polybench",
+    "lang-c",
+    "cpu"
+  ]
+}

@@ -30,6 +30,50 @@ from which the task downloads them by default (`--capsules` names another folder
 URL). The task source contains their SHA-256 checksums. The older private captures are
 still accepted (`--capture`); they are not published.
 
+## cBench, PolyBench/C and PolyBench/GPU programs, their inputs
+
+`task/import-ck` converted the CK programs cBench (22), PolyBench/C 3.2 CPU (27) and PolyBench/GPU 1.0
+CUDA (15) and their small inputs into `program/` and `dataset/`. They inherit `template-c-cpu` and the
+hooks of `template-ck-program` (cmeta-aops, so they need a cmeta-aops with that template), use its
+run-time libraries (`lib-xopenme`, `lib-polybench`, `lib-cuda`) and run on the host CPU of Windows (MSVC,
+clang), Linux (GCC, clang) and macOS (clang), on Android (`--compute=android-cpu`) and, the PolyBench/GPU
+ones, on an NVIDIA GPU (`--compute=cuda`):
+
+```sh
+cx program run cbench-consumer-jpeg-c cpu -q
+cx program run cbench-bzip2 cpu --cmd=decode -q
+cx program run polybench-cpu-2mm cpu --compile.size=large -q
+cx program run polybench-cuda-gemm cuda -q
+```
+
+The full cTuning MiDataSets (491 inputs, about 20 per program) are datasets too
+(`dataset/ctuning-<kind>-<nnnn>`); `task/get-ctuning-dataset` fetches their files on demand from the
+capsules (one download per kind, checked and cached):
+
+```sh
+cx program run cbench-consumer-jpeg-c cpu --dataset=ctuning-image-ppm-0007 -q
+```
+
+The codelets of the CK paper repository - an edge-detection filter on a 1536 x 1536 image and its
+adaptive version, tuned for a day and a night snapshot (`--time=day|night`) - are the programs
+`shared-codelet-*`, and the two office webcam snapshots they used are datasets fetched on demand from
+their own capsule (`dataset/ctuning-*fgg-office*`):
+
+```sh
+cx program run shared-codelet-adaptive-filter cpu --time=night --dataset=ctuning-image-raw-bin-fgg-office-night-gray -q
+```
+
+`task/test-ck-programs` runs every program and command on a target (`--all_datasets`: on every input)
+and compares the outputs of several targets.
+
+## Licences
+
+This repository's own content - the cMeta descriptions, tasks, notes and patches - is Apache-2.0
+(`LICENSE`). The sources of the converted programs keep the licences of their authors (GPL, LGPL, BSD,
+IJG, libtiff, PolyBench/C 3.2 under the GPLv2 ...), each in the program's `src/`: **`LICENSES.md`**
+lists the licence of every program and dataset, generated from their descriptions
+(`cx task run import-ck --licenses_md`).
+
 ## Git identity
 
 Commits are made with the ctuning-admin account's SSH authentication/signing key.

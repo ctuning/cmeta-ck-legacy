@@ -1,0 +1,17 @@
+artifact: e4bfa3539ac64d5f
+category: task,c36be4b9314a45e0
+tags:
+  - get
+  - ctuning
+  - dataset
+  - midatasets
+  - cbench
+  - capsule
+authors: Grigori Fursin
+creation_timestamp: '2026-11-15T19:40:33.735303+00:00'
+generator:
+  method: agent
+  agent: Claude Code 2.1.322
+  via: cmeta 0.42.0
+  by: Grigori Fursin
+desc: "The full cBench inputs (cTuning MiDataSets) on demand: a capsule per kind of input, downloaded once into the cache, checked and unpacked; returns the files of one entry for the dataset task."

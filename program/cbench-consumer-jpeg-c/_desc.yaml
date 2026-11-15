@@ -1,0 +1,160 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'cBench (MiBench-based, cTuning)'
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'program:cbench-consumer-jpeg-c'
+  ck_uid: '43f6b09a6c8cba8f'
+  ck_created: '2012-04-18'
+  converted: '2026-11-15 by task::import-ck'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'Independent JPEG Group licence'
+  spdx: 'IJG'
+  file: 'src/LICENSE'
+
+###################################################################################################
+local_vars:
+  lang: c
+
+  src_file_names:
+    - 'cdjpeg.c'
+    - 'cjpeg.c'
+    - 'ctuning-rtl.c'
+    - 'jcapimin.c'
+    - 'jcapistd.c'
+    - 'jccoefct.c'
+    - 'jccolor.c'
+    - 'jcdctmgr.c'
+    - 'jchuff.c'
+    - 'jcinit.c'
+    - 'jcmainct.c'
+    - 'jcmarker.c'
+    - 'jcmaster.c'
+    - 'jcomapi.c'
+    - 'jcparam.c'
+    - 'jcphuff.c'
+    - 'jcprepct.c'
+    - 'jcsample.c'
+    - 'jctrans.c'
+    - 'jdapimin.c'
+    - 'jdapistd.c'
+    - 'jdatadst.c'
+    - 'jdatasrc.c'
+    - 'jdcoefct.c'
+    - 'jdcolor.c'
+    - 'jddctmgr.c'
+    - 'jdhuff.c'
+    - 'jdinput.c'
+    - 'jdmainct.c'
+    - 'jdmarker.c'
+    - 'jdmaster.c'
+    - 'jdmerge.c'
+    - 'jdphuff.c'
+    - 'jdpostct.c'
+    - 'jdsample.c'
+    - 'jdtrans.c'
+    - 'jerror.c'
+    - 'jfdctflt.c'
+    - 'jfdctfst.c'
+    - 'jfdctint.c'
+    - 'jidctflt.c'
+    - 'jidctfst.c'
+    - 'jidctint.c'
+    - 'jidctred.c'
+    - 'jmemansi.c'
+    - 'jmemmgr.c'
+    - 'jquant1.c'
+    - 'jquant2.c'
+    - 'jutils.c'
+    - 'rdbmp.c'
+    - 'rdgif.c'
+    - 'rdppm.c'
+    - 'rdrle.c'
+    - 'rdswitch.c'
+    - 'rdtarga.c'
+
+  target_file_name: 'consumer-jpeg-c'
+
+  input_files:
+    data: '{{local.dataset.path}}'
+
+  output_files:
+    - 'tmp-ck-timer.json'
+    - 'tmp-output.tmp'
+
+  result_files:
+    stats-xopenme: tmp-ck-timer.json
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+
+  # Where CK measured the time goes (hot_functions)
+  ck_hot_functions:
+    encode: ["encode_mcu_AC_refine", "encode_mcu_AC_first", "jpeg_fdct_islow", "forward_DCT", "rgb_ycc_convert", "jpeg_gen_optimal_table"]
+
+###################################################################################################
+params:
+  compile:
+    d:
+      XOPENME:
+
+params_os:
+  linux:
+    compile:
+      lib_names:
+        - m
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          - task: setup,a2f9b61079ce4333
+            name: lib-xopenme,c7b96678a7734510
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          # Android: the libraries of the NDK sysroot
+          - task: setup,a2f9b61079ce4333
+            if: '"android-cpu" in {{global.target.compute|$[]}}'
+            name: lib-sysroot-android,cdc22b7617f54f2c
+            with:
+              static: '{{local.params.compile.static|$None}}'
+              lib_names:
+                - dl
+                - m
+                - z
+              dynamic_libs:
+                - c++_shared
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - task: dataset,30e20c7489f14f84
+            dataset_tags: image,ppm
+            name: '{{params.dataset|$None}}'
+            filename: '{{params.dataset_file|$None}}'
+
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+      - match:
+          task: setup-run,148f6c1fdb4247df
+        update:
+          cmd_main: '-dct int -progressive -opt -outfile tmp-output.tmp {qinput_files.data} {{local.ck_redirects|}}'

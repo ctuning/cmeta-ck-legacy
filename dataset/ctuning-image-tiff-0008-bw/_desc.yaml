@@ -1,0 +1,21 @@
+authors: Grigori Fursin
+description: 'cBench input image-tiff-0008-bw (cTuning MiDataSets), from the capsule 20261115.ctuning-midatasets.image-tiff-bw.tar.gz, downloaded on demand by task::get-ctuning-dataset.'
+
+# The files come from a capsule of the cTuning MiDataSets, unpacked once into the cache
+uses:
+  - task: get-ctuning-dataset,e4bfa3539ac64d5f
+    capsule: 'image-tiff-bw'
+    entry: 'image-tiff-0008-bw'
+result_from_ctx: '{{global.get-ctuning-dataset}}'
+
+# The files of the dataset in CK's order: the first is what a program gets by default.
+files:
+  - 'data.tiff'
+
+origin:
+  ck_repo: 'ctuning-datasets'
+  ck_entry: 'dataset:image-tiff-0008-bw'
+  ck_uid: '924e167b2a2b4712'
+  ck_created: '2012-04-12'
+  capsule: '20261115.ctuning-midatasets.image-tiff-bw.tar.gz'
+  converted: '2026-11-15 by task::import-ck'

@@ -1,0 +1,35 @@
+# cbench-office-stringsearch2
+
+cBench (MiBench-based, cTuning): the CK program `cbench-office-stringsearch2` of `ctuning/ck-ml`, converted to cMeta by
+`task::import-ck` of this repository. It inherits `template-c-cpu` and the hooks of
+`template-ck-program` (both in cmeta-aops) and uses the run-time libraries of cmeta-aops
+(`lib-xopenme`).
+
+## Run
+
+```bash
+cx program run cbench-office-stringsearch2 cpu -q
+cx program run cbench-office-stringsearch2 --compute=android-cpu --target_tmp=tmp-android-cpu -q
+```
+
+The input is a `dataset` artifact selected by tags (with `-q`, the first; without it, a menu):
+`--dataset=<alias>` picks one, `--dataset_file=<file name or path>` a file of it or any local file.
+
+| Command | Dataset tags | File | Command line after the executable |
+|---|---|---|---|
+| `default` | `doc,txt` | `data.txt` | `{qinput_files.data} {qinput_files.data1} tmp-output.tmp` |
+
+`--repeat=<n>` repeats the kernel n times (`CT_REPEAT_MAIN`). Standard output and error go to
+`tmp-output1.tmp` and `tmp-output2.tmp` of the build folder (not on iOS); the times of the
+kernel, from xOpenME, are in the result (`stats-xopenme`, `tmp-ck-timer.json`).
+
+## Changes to the CK sources
+
+Only where they would not build or run on every target:
+
+- fgg_search.c: the tables of the lines of both files as long as the files (malloc after counting); they were 30000 entries each on the stack, and inputs of the MiDataSets have more lines (txt-0004: 40001 search strings), which crashed the program; the lines are counted with the buffer size they are read with, so that both passes agree
+
+## Licence
+
+The sources keep the licence of their authors: see `src/LICENSE*` or `src/COPYRIGHT` and the headers
+of the sources (THIRD-PARTY.md of this repository); the cMeta description and hooks are Apache-2.0.

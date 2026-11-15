@@ -1,0 +1,57 @@
+# aesxam.c: the IV and padding generator in 32-bit arithmetic as on the machines it was written for
+#   (unsigned long is 64 bits on Linux, macOS and Android, and its 8 bytes were stored into a 4-byte
+#   array), and the file length by ftell (fgetpos wrote a whole fpos_t, 16 bytes with glibc, into an
+#   unsigned long); the output was different with every compiler
+# aes.h: the 32-bit word of AES as unsigned int, as its comment asks ("must be a 32-bit storage
+#   unit"; unsigned long is 64 bits on Linux, macOS and Android)
+--- a/aes.h
++++ b/aes.h
+@@ -221,7 +221,7 @@
+ /* End of configuration options, but see also aes.c */
+ 
+ typedef unsigned char   byte;           /* must be an 8-bit storage unit */
+-typedef unsigned long   word;           /* must be a 32-bit storage unit */
++typedef unsigned int    word;           /* must be a 32-bit storage unit (cMeta: was unsigned long) */
+ typedef short           aes_ret;        /* function return value         */
+ 
+ #define aes_bad     0
+--- a/aesxam.c
++++ b/aesxam.c
+@@ -38,6 +38,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include <ctype.h>
+ 
+ #include "aes.h"
+@@ -71,7 +72,8 @@
+ #define RAND(a,b) (((a = 36969 * (a & 65535) + (a >> 16)) << 16) + (b = 18000 * (b & 65535) + (b >> 16))  )
+ 
+ void fillrand(char *buf, int len)
+-{   static unsigned long a[2], mt = 1, count = 4;
++{   static unsigned int  a[2];	/* cMeta: 32 bits (was unsigned long) */
++    static unsigned long mt = 1, count = 4;
+     static char          r[4];
+     int                  i;
+ 
+@@ -86,7 +88,9 @@
+     {
+         if(count == 4)
+         {
+-            *(unsigned long*)r = RAND(a[0], a[1]);
++            {   unsigned int v = RAND(a[0], a[1]);	/* cMeta: 4 bytes into r[4] */
++                memcpy(r, &v, sizeof(v));
++            }
+             count = 0;
+         }
+ 
+@@ -103,7 +107,7 @@
+ 
+     fillrand(outbuf, 16);           /* set an IV for CBC mode           */
+     fseek(fin, 0, SEEK_END);        /* get the length of the file       */
+-    fgetpos(fin, (fpos_t*)&flen);   /* and then reset to start          */
++    flen = (unsigned long) ftell(fin);   /* and then reset to start (cMeta: was fgetpos into flen) */
+     fseek(fin, 0, SEEK_SET);        
+     fwrite(outbuf, 1, 16, fout);    /* write the IV to the output       */
+     fillrand(inbuf, 1);             /* make top 4 bits of a byte random */

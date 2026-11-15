@@ -1,0 +1,70 @@
+# bf.c: the input and output files in binary mode ("rb", "wb"; Windows changed the bytes in text mode)
+# bf.c: the xOpenME timer spans the whole loop over the blocks, and its state is written and freed once
+#   after it (before, xopenme_finish() ran after every 40-byte block: a double free from the second block)
+--- a/bf.c
++++ b/bf.c
+@@ -76,18 +76,23 @@
+ }
+ 
+ /* open the input and output files */
+-if ((fp = fopen(argv[2],"r"))==0)
++if ((fp = fopen(argv[2],"rb"))==0)
+ {
+         fprintf(stderr, "Usage: blowfish {e|d} <intput> <output> key\n");
+ 	exit(EXIT_FAILURE);
+ };
+-if ((fp2 = fopen(argv[3],"w"))==0)
++if ((fp2 = fopen(argv[3],"wb"))==0)
+ {
+         fprintf(stderr, "Usage: blowfish {e|d} <intput> <output> key\n");
+ 	exit(EXIT_FAILURE);
+ };
+ 
+ i=0;
++
++#ifdef XOPENME
++  xopenme_clock_start(0);
++#endif
++
+ while(!feof(fp))
+ {
+     int           current_num;
+@@ -101,10 +106,6 @@
+     current_num = num;
+     memcpy(current_ivec, ivec, 32);
+ 
+-#ifdef XOPENME
+-  xopenme_clock_start(0);
+-#endif
+-
+ for (ct_repeat=0; ct_repeat<ct_repeat_max; ct_repeat++)
+ {
+   /* The call to BF_cfb64_encrypt modifies ivec and num. We need to make a
+@@ -115,13 +116,6 @@
+ 	BF_cfb64_encrypt(indata,outdata,i,&key,ivec,&num,encordec);
+ }
+ 
+-#ifdef XOPENME
+-  xopenme_clock_end(0);
+-
+-  xopenme_dump_state();
+-  xopenme_finish();
+-#endif
+-
+ 	for(j=0;j<i;j++)
+ 	{
+ 		/*printf("%c",outdata[j]);*/
+@@ -129,6 +123,13 @@
+ 	}
+ 	i=0;
+ }
++
++#ifdef XOPENME
++  xopenme_clock_end(0);
++
++  xopenme_dump_state();
++  xopenme_finish();
++#endif
+ 
+ fclose(fp);
+ fclose(fp2);

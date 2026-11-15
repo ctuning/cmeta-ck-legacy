@@ -1,0 +1,16 @@
+artifact: 1fd0a34a505a4adc
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-15T19:44:55.663020+00:00'
+desc: 'cBench input benc-0007 (cTuning MiDataSets, on demand): data.benc.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- crypto
+- benc

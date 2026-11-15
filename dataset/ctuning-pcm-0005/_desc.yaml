@@ -1,0 +1,21 @@
+authors: Grigori Fursin
+description: 'cBench input pcm-0005 (cTuning MiDataSets), from the capsule 20261115.ctuning-midatasets.pcm.tar.gz, downloaded on demand by task::get-ctuning-dataset.'
+
+# The files come from a capsule of the cTuning MiDataSets, unpacked once into the cache
+uses:
+  - task: get-ctuning-dataset,e4bfa3539ac64d5f
+    capsule: 'pcm'
+    entry: 'pcm-0005'
+result_from_ctx: '{{global.get-ctuning-dataset}}'
+
+# The files of the dataset in CK's order: the first is what a program gets by default.
+files:
+  - 'data.pcm'
+
+origin:
+  ck_repo: 'ctuning-datasets'
+  ck_entry: 'dataset:pcm-0005'
+  ck_uid: 'f41fba84bbd150b5'
+  ck_created: '2012-04-12'
+  capsule: '20261115.ctuning-midatasets.pcm.tar.gz'
+  converted: '2026-11-15 by task::import-ck'

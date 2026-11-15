@@ -1,0 +1,37 @@
+authors: Grigori Fursin
+description: The full cBench inputs (cTuning MiDataSets) on demand - a capsule per kind, downloaded once into the cache, checked, unpacked.
+
+# One cache entry per capsule; the entry asked for is chosen after (finish_dynamic_result), so the
+# 20 inputs of a kind share one download
+store_global: True
+storage_key: get-ctuning-dataset
+cache: True
+cache_params:
+  - capsule
+
+params_map:
+  arg2: capsule
+  arg3: entry
+
+# Where the capsules are: a folder, or a URL with {name} for a capsule's file name. --capsules on the
+# command line, else the config artifact task-get-ctuning-dataset (key capsules), else the place of the
+# capsule's set below (its Zenodo record, once published), else this default (none until then).
+capsules: ''
+
+# The sets of capsules: each index lists its capsules, their entries and the SHA-256 of every file
+# (made with them); "url" is where the set is published (a URL with {name}), empty until it is.
+indexes:
+  - index: files/20261115.ctuning-midatasets.index.json
+    url: ''
+  - index: files/20261115.ck-office-snapshots.index.json
+    url: ''
+
+configs:
+  task-get-ctuning-dataset:
+    desc: Where this machine takes the capsules of the cTuning MiDataSets and of the CK office snapshots from.
+    keys:
+      capsules:
+        desc: >-
+          a folder with the capsules (20261115.ctuning-midatasets.<kind>.tar.gz), or a URL with {name} for the
+          file name of a capsule; --capsules on the command line wins, the task's default (the Zenodo record,
+          once it exists) is taken without either

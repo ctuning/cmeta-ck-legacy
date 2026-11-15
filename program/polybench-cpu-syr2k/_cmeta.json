@@ -1,0 +1,24 @@
+{
+  "artifact": "a0ccbd54f5c54d55",
+  "authors": "Grigori Fursin",
+  "category": "program,22788f3c30d04e6d",
+  "constraints": {
+    "supported_compute": [
+      "android-cpu",
+      "cpu"
+    ]
+  },
+  "creation_timestamp": "2026-11-15T19:11:11.218825+00:00",
+  "desc": "PolyBench/C 3.2 (Ohio State University), CK version: syr2k, converted from the CK program polybench-cpu-syr2k.",
+  "generator": {
+    "agent": "Claude Code 2.1.322",
+    "by": "Grigori Fursin",
+    "method": "agent",
+    "via": "cmeta 0.42.0"
+  },
+  "tags": [
+    "polybench",
+    "lang-c",
+    "cpu"
+  ]
+}

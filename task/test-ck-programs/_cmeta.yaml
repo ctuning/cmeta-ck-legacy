@@ -1,0 +1,18 @@
+artifact: 9c893dc6f8894abc
+category: task,c36be4b9314a45e0
+tags:
+  - test
+  - ck
+  - program
+  - batch
+  - compare
+authors: Grigori Fursin
+creation_timestamp: '2026-11-15T19:12:09.445087+00:00'
+generator:
+  method: agent
+  agent: Claude Code 2.1.322
+  via: cmeta 0.42.0
+  by: Grigori Fursin
+desc: "Run every command of the converted CK programs on one target, record status, times and the digests of their outputs, and compare the records of several targets."
+uses_categories:
+  program: program,22788f3c30d04e6d

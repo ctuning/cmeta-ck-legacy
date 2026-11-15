@@ -1,0 +1,141 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'cBench (MiBench-based, cTuning)'
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'program:cbench-security-rijndael'
+  ck_uid: '9842d32f842b31e8'
+  ck_created: '2012-09-23'
+  converted: '2026-11-15 by task::import-ck'
+  # What was changed in the CK sources, and why
+  patches:
+    - 'aesxam.c: the IV and padding generator in 32-bit arithmetic as on the machines it was written for (unsigned long is 64 bits on Linux, macOS and Android, and its 8 bytes were stored into a 4-byte array), and the file length by ftell (fgetpos wrote a whole fpos_t, 16 bytes with glibc, into an unsigned long); the output was different with every compiler'
+    - 'aes.h: the 32-bit word of AES as unsigned int, as its comment asks ("must be a 32-bit storage unit"; unsigned long is 64 bits on Linux, macOS and Android)'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'Brian Gladman''s licence (BSD 2-clause style)'
+  file: 'src/LICENSE'
+
+###################################################################################################
+local_vars:
+  lang: c
+
+  src_file_names:
+    - 'aes.c'
+    - 'aesxam.c'
+    - 'ctuning-rtl.c'
+
+  target_file_name: 'security-rijndael'
+
+  input_files:
+    data: '{{local.dataset.path}}'
+
+  output_files:
+    - 'tmp-ck-timer.json'
+
+  result_files:
+    stats-xopenme: tmp-ck-timer.json
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+
+  # Where CK measured the time goes (hot_functions)
+  ck_hot_functions:
+    decode: ["decrypt"]
+    encode: ["encrypt"]
+
+###################################################################################################
+params:
+  compile:
+    d:
+      XOPENME:
+
+params_os:
+  linux:
+    compile:
+      lib_names:
+        - m
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          - task: setup,a2f9b61079ce4333
+            name: lib-xopenme,c7b96678a7734510
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          # Android: the libraries of the NDK sysroot
+          - task: setup,a2f9b61079ce4333
+            if: '"android-cpu" in {{global.target.compute|$[]}}'
+            name: lib-sysroot-android,cdc22b7617f54f2c
+            with:
+              static: '{{local.params.compile.static|$None}}'
+              lib_names:
+                - dl
+                - m
+                - z
+              dynamic_libs:
+                - c++_shared
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - task: dataset,30e20c7489f14f84
+            dataset_tags: enc,crypto
+            name: '{{params.dataset|$None}}'
+            filename: '{{params.dataset_file|$None}}'
+
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+###################################################################################################
+# The commands of the CK program (--cmd=<name>)
+updates_cmd:
+  decode:
+    run:
+      uses:
+        - match:
+            task: dataset,30e20c7489f14f84
+          update:
+            dataset_tags: enc,crypto
+            filename: '{{params.dataset_file|$None}}'
+        - match:
+            task: setup-run,148f6c1fdb4247df
+          update:
+            cmd_main: '{qinput_files.data} tmp-output.tmp d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321 {{local.ck_redirects|}}'
+    local_vars:
+      +output_files:
+        - 'tmp-output.tmp'
+
+  encode:
+    run:
+      uses:
+        - match:
+            task: dataset,30e20c7489f14f84
+          update:
+            dataset_tags: doc,txt
+            filename: '{{params.dataset_file|data.txt}}'
+        - match:
+            task: setup-run,148f6c1fdb4247df
+          update:
+            cmd_main: '{qinput_files.data} tmp-output.tmp e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321 {{local.ck_redirects|}}'
+    local_vars:
+      +output_files:
+        - 'tmp-output.tmp'

@@ -1,0 +1,18 @@
+artifact: b97be9e5d77040ab
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-15T20:59:24.424445+00:00'
+desc: 'CK paper input image-raw-bin-fgg-office-night-gray (the office webcam snapshots
+  of the CK paper repository, on demand): data.bin, README.txt, data_orig.jpg.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- ck-paper
+- office
+- image
+- raw-bin
+- rgb

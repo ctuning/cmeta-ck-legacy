@@ -1,0 +1,194 @@
+authors: Grigori Fursin
+description: Convert CK programs and datasets into cMeta artifacts (cBench, PolyBench/C, PolyBench/GPU CUDA and their inputs).
+cache: false
+store_global: false
+
+params_map:
+  arg2: ck_path
+
+# The targets the converted programs declare (constraints.supported_compute), by family.
+supported_compute:
+  default:
+    - android-cpu
+    - cpu
+  polybench-cuda:
+    - cuda
+
+# Prefixes of CK program names: the family decides the libraries and the hooks.
+families:
+  cbench-: cbench
+  polybench-cpu-: polybench
+  polybench-cuda-: polybench-cuda
+  shared-codelet-: ck-codelet
+
+# What the CK meta of a program cannot say by itself. Per CK program, per command:
+#   dataset_tags  the tags of the dataset a command takes (CK accepted "any dataset" for some)
+#   dataset_file  the file of the dataset a command takes by default (CK: the first of its files)
+#   cmd_main      the command line after the executable, when the CK one had to change
+#   input_files   False when the command takes no dataset file (the dataset gives a number)
+#   local_vars    keys for the hooks (template-ck-program of cmeta-aops: customize2, customize_ck_run)
+programs:
+  cbench-automotive-bitcount:
+    local_vars:
+      ck_number_from_dataset: True
+    commands:
+      default:
+        input_files: False
+
+  # encode: CK took any dataset; a PostScript document (no other program reads it) compresses well
+  cbench-bzip2:
+    commands:
+      decode:
+        dataset_tags: archiver,bzip2
+        dataset_file: data.bz2
+      encode:
+        dataset_tags: doc,ps
+
+  # Sources written before C99: GNU C89 with GCC and clang (api_v1.py: LEGACY_C_FLAGS)
+  cbench-consumer-mad:
+    local_vars:
+      ck_legacy_c: True
+
+  cbench-consumer-tiff2bw:
+    local_vars:
+      ck_legacy_c: True
+
+  cbench-consumer-tiff2dither:
+    local_vars:
+      ck_legacy_c: True
+
+  cbench-consumer-tiff2median:
+    local_vars:
+      ck_legacy_c: True
+
+  cbench-consumer-tiff2rgba:
+    local_vars:
+      ck_legacy_c: True
+
+  cbench-telecom-gsm:
+    local_vars:
+      ck_legacy_c: True
+
+  cbench-office-stringsearch2:
+    local_vars:
+      ck_dataset_more_files: True
+    commands:
+      default:
+        dataset_tags: doc,txt
+        dataset_file: data.txt
+
+  cbench-security-pgp:
+    local_vars:
+      ck_legacy_c: True
+      ck_run_files:
+        - pubring.pgp
+        - secring.pgp
+    commands:
+      encode:
+        dataset_tags: doc,txt
+        dataset_file: data.txt
+
+  cbench-security-rijndael:
+    commands:
+      encode:
+        dataset_tags: doc,txt
+        dataset_file: data.txt
+
+  cbench-security-sha:
+    commands:
+      default:
+        dataset_tags: doc,txt
+        dataset_file: data.txt
+
+  cbench-telecom-crc32:
+    commands:
+      default:
+        dataset_tags: audio,pcm
+
+  # The codelets of the CK paper: K&R sources; the adaptive filter takes the time of the day (CT_TIME)
+  shared-codelet-filter:
+    local_vars:
+      ck_legacy_c: True
+
+  shared-codelet-filter5:
+    local_vars:
+      ck_legacy_c: True
+
+  shared-codelet-adaptive-filter:
+    local_vars:
+      ck_legacy_c: True
+    run_time_env:
+      CT_TIME: '{{local.params.time|day}}'
+
+  # Read and write files given on the command line instead of stdin and stdout
+  # (files/patches/*.patch: an iOS app has no shell redirection, Windows' stdin is in text mode)
+  cbench-telecom-adpcm-c:
+    commands:
+      encode:
+        cmd_main: '{qinput_files.data} tmp-output.tmp'
+        output_files:
+          - tmp-output.tmp
+
+  cbench-telecom-adpcm-d:
+    commands:
+      decode:
+        cmd_main: '{qinput_files.data} tmp-output.tmp'
+        output_files:
+          - tmp-output.tmp
+
+# The licence of the sources of each converted program, by program or family, written into its
+# _desc.yaml ("license") and into LICENSES.md (import-ck --licenses_md): an SPDX identifier when the
+# text is one of the SPDX list, a name, and the file of the program where the text is.
+licenses_info:
+  cbench-automotive-bitcount: {spdx: '', name: 'SNIPPETS collection: "FREE with no restrictions"', file: src/LICENSE}
+  cbench-telecom-crc32: {spdx: '', name: 'SNIPPETS collection: "FREE with no restrictions"', file: src/LICENSE}
+  cbench-automotive-qsort1: {spdx: '', name: 'GPL, version not stated (MiBench)', file: src/LICENSE}
+  cbench-network-dijkstra: {spdx: '', name: 'GPL, version not stated (MiBench)', file: src/LICENSE}
+  cbench-network-patricia: {spdx: '', name: 'GPL, version not stated (MiBench)', file: src/LICENSE}
+  cbench-bzip2: {spdx: bzip2-1.0.6, name: 'bzip2 licence (Julian Seward)', file: src/LICENSE}
+  cbench-consumer-jpeg-c: {spdx: IJG, name: 'Independent JPEG Group licence', file: src/LICENSE}
+  cbench-consumer-jpeg-d: {spdx: IJG, name: 'Independent JPEG Group licence', file: src/LICENSE}
+  cbench-consumer-lame: {spdx: LGPL-2.0-or-later AND GPL-2.0-or-later, name: 'LAME 3.70: GNU Library GPL v2 or later (lame.c ...), and GNU GPL v2 or later for quantize.c and vbrquantize.c', file: src/LICENSE}
+  cbench-consumer-mad: {spdx: GPL-2.0-or-later, name: 'GNU GPL v2 or later (MAD, Robert Leslie)', file: src/LICENSE}
+  cbench-consumer-tiff2bw: {spdx: libtiff, name: 'libtiff licence (Sam Leffler, SGI)', file: src/COPYRIGHT}
+  cbench-consumer-tiff2dither: {spdx: libtiff, name: 'libtiff licence (Sam Leffler, SGI)', file: src/COPYRIGHT}
+  cbench-consumer-tiff2median: {spdx: libtiff, name: 'libtiff licence (Sam Leffler, SGI)', file: src/COPYRIGHT}
+  cbench-consumer-tiff2rgba: {spdx: libtiff, name: 'libtiff licence (Sam Leffler, SGI)', file: src/COPYRIGHT}
+  cbench-office-stringsearch2: {spdx: BSD-4-Clause-UC, name: 'BSD 4-clause (University of California), in the source', file: src/fgg_search.c}
+  cbench-security-blowfish: {spdx: SSLeay-standalone, name: 'SSLeay licence (Eric Young)', file: src/LICENSE}
+  cbench-security-pgp: {spdx: '', name: 'PGP 2.6.3i licence: "free for use internationally"; the RSA and IDEA patents it names have expired', file: src/LICENSE}
+  cbench-security-rijndael: {spdx: '', name: 'Brian Gladman''s licence (BSD 2-clause style)', file: src/LICENSE}
+  cbench-security-sha: {spdx: '', name: 'not stated: the source header names its authors (Uwe Hollerbach, after Peter Gutmann)', file: src/LICENSE}
+  cbench-telecom-adpcm-c: {spdx: '', name: 'Stichting Mathematisch Centrum (CWI) permission notice', file: src/LICENSE}
+  cbench-telecom-adpcm-d: {spdx: '', name: 'Stichting Mathematisch Centrum (CWI) permission notice', file: src/LICENSE}
+  cbench-telecom-gsm: {spdx: TU-Berlin-1.0, name: 'GSM 06.10 licence (Jutta Degener, Carsten Bormann, TU Berlin)', file: src/COPYRIGHT}
+  # PolyBench/C 3.2: GPLv2, the licence of the PolyBench project on SourceForge where 3.2 was released (the
+  # release has no licence file; the Ohio State University licence came with 4.1). PolyBench/GPU 1.0 states none.
+  polybench: {spdx: GPL-2.0-only, name: 'GNU GPL v2 (PolyBench/C 3.2, copyright 2011-2012 the Ohio State University; the licence of the PolyBench project on SourceForge)', file: src/LICENSE.txt}
+  polybench-cuda: {spdx: '', name: 'not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its CUDA codes derive from PolyBench 2.0, GPLv2)', file: src/NOTICE.txt}
+  # The codelets of the CK paper repository (BSD-3-Clause): filter.c is the edge detection of UTDSP, whose
+  # authors state no licence; ctuning.c (the timers) is LGPL-2.1-or-later
+  shared-codelet-filter: {spdx: '', name: 'filter.c: UTDSP edge detection (copyright 1992 Mazen A.R. Saghir, University of Toronto; no licence stated), changed by Grigori Fursin; ctuning.c: LGPL-2.1-or-later; the CK paper repository: BSD-3-Clause', file: src/LICENSE.txt}
+  shared-codelet-filter5: {spdx: '', name: 'filter.c: UTDSP edge detection (copyright 1992 Mazen A.R. Saghir, University of Toronto; no licence stated), changed by Grigori Fursin; ctuning.c: LGPL-2.1-or-later; the CK paper repository: BSD-3-Clause', file: src/LICENSE.txt}
+  shared-codelet-adaptive-filter: {spdx: '', name: 'filter.c: UTDSP edge detection (copyright 1992 Mazen A.R. Saghir, University of Toronto; no licence stated), changed by Grigori Fursin; the CK paper repository: BSD-3-Clause', file: src/LICENSE.txt}
+
+# Licence files a CK entry lacks, copied into src/ when missing (files/licenses/<file>): by family or program
+licenses:
+  polybench:
+    LICENSE.txt: polybench-c-3.2.LICENSE.txt
+    COPYING: gpl-2.0.txt
+  polybench-cuda:
+    NOTICE.txt: polybench-gpu-1.0.NOTICE.txt
+  ck-codelet:
+    LICENSE.txt: reproduce-ck-paper.LICENSE.txt
+  cbench-consumer-tiff2rgba:
+    COPYRIGHT: libtiff.COPYRIGHT
+
+# CK datasets: the tags that are not carried over, and what a converted dataset is called.
+datasets:
+  drop_tags:
+    - dataset
+  alias_prefix: ctuning-
+  add_tags:
+    - ctuning
+    - cbench

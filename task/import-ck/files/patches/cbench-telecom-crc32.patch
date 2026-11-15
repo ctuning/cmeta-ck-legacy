@@ -1,0 +1,23 @@
+# crc_32.c: the file read in binary mode everywhere (Windows stopped at the first byte 0x1A in
+#   text mode), and the CRC printed on 32 bits (unsigned long is 64 bits on Linux, macOS and Android,
+#   where it was printed as FFFFFFFF<crc>)
+--- a/crc_32.c
++++ b/crc_32.c
+@@ -132,7 +132,7 @@
+ #ifdef MSDOS
+       if ((fin=fopen(name, "rb"))==NULL)
+ #else
+-      if ((fin=fopen(name, "r"))==NULL)
++      if ((fin=fopen(name, "rb"))==NULL)
+ #endif
+       {
+             perror(name);
+@@ -182,7 +182,7 @@
+       {
+             errors |= crc32file(*++argv, &crc, &charcnt);
+             if (print)
+-                printf("%08lX %7ld %s\n", crc, charcnt, *argv);
++                printf("%08lX %7ld %s\n", (unsigned long) (crc & 0xFFFFFFFFUL), charcnt, *argv);
+       }
+       return(errors != 0);
+ }

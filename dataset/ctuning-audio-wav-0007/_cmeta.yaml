@@ -1,0 +1,16 @@
+artifact: d37dffd19cd84a77
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-15T19:44:53.747073+00:00'
+desc: 'cBench input audio-wav-0007 (cTuning MiDataSets, on demand): data.wav.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- audio
+- wav

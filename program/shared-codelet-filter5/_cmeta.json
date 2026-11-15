@@ -1,0 +1,25 @@
+{
+  "artifact": "34997fcb2752460c",
+  "authors": "Grigori Fursin",
+  "category": "program,22788f3c30d04e6d",
+  "constraints": {
+    "supported_compute": [
+      "android-cpu",
+      "cpu"
+    ]
+  },
+  "creation_timestamp": "2026-11-15T21:00:27.444037+00:00",
+  "desc": "Codelets of the CK paper repository (reproduce-ck-paper): edge detection of an image: filter5, converted from the CK program shared-codelet-filter5.",
+  "generator": {
+    "agent": "Claude Code 2.1.322",
+    "by": "Grigori Fursin",
+    "method": "agent",
+    "via": "cmeta 0.42.0"
+  },
+  "tags": [
+    "small",
+    "demo",
+    "lang-c",
+    "crowd-tuning"
+  ]
+}

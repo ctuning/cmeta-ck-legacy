@@ -1,0 +1,25 @@
+{
+  "artifact": "c1a8a3b6dc694cbf",
+  "authors": "Grigori Fursin",
+  "category": "program,22788f3c30d04e6d",
+  "constraints": {
+    "supported_compute": [
+      "android-cpu",
+      "cpu"
+    ]
+  },
+  "creation_timestamp": "2026-11-15T18:56:27.073329+00:00",
+  "desc": "cBench (MiBench-based, cTuning): office-stringsearch2, converted from the CK program cbench-office-stringsearch2.",
+  "generator": {
+    "agent": "Claude Code 2.1.322",
+    "by": "Grigori Fursin",
+    "method": "agent",
+    "via": "cmeta 0.42.0"
+  },
+  "tags": [
+    "small",
+    "cbench",
+    "lang-c",
+    "crowd-tuning"
+  ]
+}
