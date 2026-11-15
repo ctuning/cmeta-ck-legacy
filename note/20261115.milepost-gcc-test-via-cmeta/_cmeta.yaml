@@ -1,0 +1,17 @@
+artifact: 3eb2e47d7c63420a
+category: note,869929895d424d5c
+tags:
+  - milepost
+  - milepost-gcc
+  - ctuning-cc
+  - legacy
+  - zenodo
+  - test
+  - reproducibility
+authors: Grigori Fursin
+creation_timestamp: '2026-11-15T13:30:34.145219+00:00'
+generator:
+  method: agent
+  agent: Claude Code 2.1.322
+  via: cmeta 0.41.1
+  by: Grigori Fursin

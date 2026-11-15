@@ -1,0 +1,12 @@
+description: MILEPOST GCC through cMeta - the archived capsules on Zenodo (10.5281/zenodo.24246695), how to use the task, what was tested (2026-11-14/15).
+
+# The archive record of the capsules (published 2026-11-15)
+zenodo:
+  doi: 10.5281/zenodo.24246695
+  doi_url: https://doi.org/10.5281/zenodo.24246695
+  record: https://zenodo.org/records/24246695
+  concept_doi: 10.5281/zenodo.24246694                            # all versions of the record
+  files: https://zenodo.org/records/24246695/files/{name}?download=1  # the task's default_capsules
+
+connections:
+  - task,c36be4b9314a45e0::extract-milepost-features-legacy,4e719bc8239d4ece

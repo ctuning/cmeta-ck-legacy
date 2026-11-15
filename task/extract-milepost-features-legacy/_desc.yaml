@@ -17,3 +17,6 @@ default_capsules: https://zenodo.org/records/24246695/files/{name}?download=1
 container_engine: docker
 container_image: python:3.12-slim
 container_volume: cmeta-milepost-legacy-20261114
+
+connections:
+  - note,869929895d424d5c::20261115.milepost-gcc-test-via-cmeta,3eb2e47d7c63420a

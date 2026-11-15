@@ -81,5 +81,8 @@ the 2026-10-20 baseline, a stdio program, invalid C, reuse; the capsules directl
 Debian 13 (Python 3.9, 3.12, 3.15), Ubuntu 26.04 and Fedora 44; a corrupted download refused; the
 runtime from the public capsules identical to the private capture's except the cleaned password lines.
 Debian 12 and Rocky 9 fail natively (glibc too old for the support tools), as described above.
+2026-11-15: from Zenodo alone on Ubuntu 26.04 (Docker and natively) and on macOS 27.2 on Apple Silicon
+(Docker Desktop, the x86-64 container emulated: 31 s for the first run, 2 s after) - the same values.
+The note `note::20261115.milepost-gcc-test-via-cmeta` of this repository has the details and scripts.
 
 This experimental task has a different UID from the unchanged live website task.
