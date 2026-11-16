@@ -38,14 +38,14 @@ features of a C program.
 ## The inputs
 
 **The cTuning MiDataSets.** The smallest input of each kind is in this repository. The full set, 491 inputs in 23
-kinds, is in two private Hugging Face datasets of cTuning, which need access:
+kinds, is in two gated Hugging Face datasets of cTuning, under the same terms of use:
 
 - [ctuning/cTuning-MiDataSets](https://huggingface.co/datasets/ctuning/cTuning-MiDataSets), a folder per kind,
   from where cMeta fetches a kind when a program needs it;
 - [ctuning/cmeta-repo-ctuning-midatasets](https://huggingface.co/datasets/ctuning/cmeta-repo-ctuning-midatasets),
   the same inputs as a cMeta repository, to pull at once.
 
-To get access, please open an issue in this repository with your Hugging Face user name. Then log in once on your
+Request access on the page of the dataset you need; the maintainers review the requests. Then log in once on your
 machine, and use them:
 
 ```sh
