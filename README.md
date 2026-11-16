@@ -27,7 +27,7 @@ cx repo pull https://github.com/ctuning/cmeta-ck-legacy
 cx program run cbench-consumer-jpeg-c cpu -q               # build and run on this machine
 cx program run polybench-cuda-gemm cuda -q                 # on an NVIDIA GPU
 cx program run polybench-opencl-gemm opencl -q             # on any OpenCL GPU
-cx task run test-ck-programs --compute=cpu -q              # every program and command
+cx task run test-ck-programs --compute=cpu -q              # every cBench and PolyBench/C command
 
 cx app run cserver                                         # the web interface at http://127.0.0.1:8004
 ```
@@ -91,6 +91,7 @@ a cMeta repository:
 cx repo pull hf://ctuning/cmeta-repo-ck-legacy-program-output
 cx program run polybench-cpu-2mm cpu --check_output=validate -q      # a difference fails the run
 cx program run polybench-cpu-2mm cpu --compile.n=512 --check_output -q   # records a new reference
+cx task run test-ck-programs --compute=cpu "--extra=--check_output=validate" -q   # every run against its reference
 ```
 
 They were recorded on Windows and hold on Linux, macOS and Android, and on NVIDIA, Intel, Apple and PowerVR GPUs.
