@@ -157,9 +157,11 @@ the tools, the parameters and the times it was made with (`case.json`).
 The references of every program with its default values - cBench on all its commands, PolyBench/C, the codelets,
 PolyBench/GPU on CUDA and on OpenCL - were recorded on Windows 11 (MSVC 19.51, an NVIDIA RTX GPU) and validate on
 Ubuntu 26.04 and 24.04, Debian 12 and Fedora 44 (GCC) and macOS (Apple clang, arm64), and the OpenCL ones on Intel,
-Apple and older NVIDIA GPUs too. One run differs by design: `cbench-security-pgp --cmd=decode` on Windows puts the 4 bytes of the literal
-packet's timestamp in front of the decoded text (PGP 2.6's `word32` is an `unsigned long`, 8 bytes on 64-bit
-Linux and macOS but 4 on Windows), so its reference holds the correct plaintext and the Windows run is reported.
+Apple and older NVIDIA GPUs too. One run differs by design: `cbench-security-pgp --cmd=decode`. PGP 2.6 writes and
+reads the timestamp of its literal packet as a `word32`, an `unsigned long` - 8 bytes on 64-bit Linux and macOS, 4
+on Windows - and CK's input `data.pgp` was written by a 64-bit Linux build, with an 8-byte timestamp. Linux and
+macOS read it back as written; Windows reads 4 bytes, and the other 4 (zeros) come out in front of the text. The
+reference holds the plaintext, and the Windows run is reported.
 
 ### The parameters of a run
 
