@@ -10,8 +10,17 @@ More about cMeta: [cTuning.ai/project/cmeta](https://cTuning.ai/project/cmeta).
 
 ## Quick start
 
+Install cMeta 0.43 or newer with its web server, cserver. The preferred way is the
+[interactive installer](https://cTuning.ai/project/cmeta/cmeta.install/), which gives the commands for your OS,
+shell and package manager. With [uv](https://github.com/astral-sh/uv) it is one line:
+
 ```sh
-pip install cmeta                                          # cMeta 0.43 or newer
+uv tool install --with pip --python ">=3.9,<3.15" "cmeta[server]"     # or: pip install "cmeta[server]"
+```
+
+Then:
+
+```sh
 cx repo pull ctuninglabs@cmeta-aops                        # its automations, 0.72 or newer
 cx repo pull https://github.com/ctuning/cmeta-ck-legacy
 
@@ -19,6 +28,8 @@ cx program run cbench-consumer-jpeg-c cpu -q               # build and run on th
 cx program run polybench-cuda-gemm cuda -q                 # on an NVIDIA GPU
 cx program run polybench-opencl-gemm opencl -q             # on any OpenCL GPU
 cx task run test-ck-programs --compute=cpu -q              # every program and command
+
+cx app run cserver                                         # the web interface at http://127.0.0.1:8004
 ```
 
 ## What is here
