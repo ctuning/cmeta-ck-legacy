@@ -145,11 +145,21 @@ cx task run test-ck-programs --programs=cbench-* --all_datasets --extra="--check
 What is compared is what CK compared (`run_correctness_output_files` of its metas: the files a program writes
 and the standard error of every program, `tmp-output2.tmp`), and the standard output where the result is
 (dijkstra, patricia, sha); the outputs that hold something of the machine or of the moment (the path of the
-input in a TIFF, a signature's time) are not: `output_check:` of each program's `_desc.yaml` (`files`, `skip`;
-`task/import-ck/_desc.yaml` keeps the additions). A case is keyed by the command, the input and the parameters
-of the run - for every program the kernel's `repeat`, for PolyBench the defines of the build (the sizes,
-`DATA_TYPE`, the dump) - and records the host, the targets, the tools, the parameters and the times it was made
-with (`case.json`).
+input in a TIFF, a signature's time, LAME's progress) are not: `output_check:` of each program's `_desc.yaml`
+(`files`, `skip`; `task/import-ck/_desc.yaml` keeps the additions). PolyBench/C compares the arrays it dumps,
+within a relative tolerance and one step of the 2 decimals it prints (x86 and arm64 round differently);
+PolyBench/GPU compares its standard output without the lines that name the device (`ignore_lines`), so its
+reference says that the GPU's result matched the CPU's - on any GPU. A case is keyed by the command, the input
+and the parameters of the run - for every program the kernel's `repeat`, for PolyBench the defines of the build
+(the sizes, `DATA_TYPE`, the dump), for the adaptive codelet its `--time` - and records the host, the targets,
+the tools, the parameters and the times it was made with (`case.json`).
+
+The references of every program with its default values - cBench on all its commands, PolyBench/C, the codelets,
+PolyBench/GPU on CUDA and on OpenCL - were recorded on Windows 11 (MSVC 19.51, an NVIDIA RTX GPU) and validate on
+Ubuntu 26.04 and 24.04, Debian 12 and Fedora 44 (GCC) and macOS (Apple clang, arm64), and the OpenCL ones on Intel,
+Apple and older NVIDIA GPUs too. One run differs by design: `cbench-security-pgp --cmd=decode` on Windows puts the 4 bytes of the literal
+packet's timestamp in front of the decoded text (PGP 2.6's `word32` is an `unsigned long`, 8 bytes on 64-bit
+Linux and macOS but 4 on Windows), so its reference holds the correct plaintext and the Windows run is reported.
 
 ### The parameters of a run
 
