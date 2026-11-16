@@ -10,11 +10,12 @@ origin:
   ck_entry: 'program:polybench-cuda-mvt'
   ck_uid: '817644943b6356dd'
   ck_created: '2012-07-08'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
-    - 'mvt.cu: cudaDeviceSynchronize() for cudaThreadSynchronize(), which CUDA 13 removed (the same since CUDA 4)'
-    - 'mvt.cu: the compute mode of the GPU from cudaDeviceGetAttribute, as CUDA 13 removed cudaDeviceProp::computeMode'
+    - 'mvt.cu: from CUDA 13 on (CUDART_VERSION >= 13000) cudaDeviceSynchronize() for cudaThreadSynchronize() and the compute mode from cudaDeviceGetAttribute - CUDA 13 removed both; CUDA 11 and 12 keep the original calls'
+    - 'mvt.cu: the arrays of main() are allocated zeroed (calloc): kernels that add into an array main() sends to the GPU uninitialized (3mm, atax, bicg, gesummv) gave results that depended on what the memory held'
+    - 'mvt.cu: the CPU reference of main() that CK commented out is compiled with CK_CPU_CHECK (defined unless --compile.check=no), so that "Non-Matching CPU-GPU Outputs" compares the GPU''s result with the CPU''s'
 
 # The licence of the sources (the cMeta description and hooks: Apache-2.0)
 license:
@@ -42,6 +43,10 @@ local_vars:
 
   # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
   ck_redirect_stdio: True
+
+  # The CPU reference of main(), a comment in the CK version: CK_CPU_CHECK (the hooks), so that
+  # "Non-Matching CPU-GPU Outputs" is a check; --compile.check=no leaves it out, as CK did
+  ck_cpu_check: True
 
   # Where CK measured the time goes (hot_functions)
   ck_hot_functions:

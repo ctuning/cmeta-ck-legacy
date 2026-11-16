@@ -83,6 +83,9 @@ class CTask(InitCTask):
         logs = os.path.splitext(out)[0] + '-logs'
         os.makedirs(logs, exist_ok = True)
         extra_args = shlex.split(extra) if extra else []
+        # The checks of the outputs (checks of _desc.yaml), but for builds without the CPU reference
+        checks = {} if any(a.lower() in ('--compile.check=no', '--compile.check=false') for a in extra_args) \
+                 else (desc.get('checks') or {})
         # A build folder per target (the plain one holds the host's build): tmp-android-cpu, tmp-cuda ...
         if compute.strip().lower() != 'cpu' and not any(a.startswith('--target_tmp') for a in extra_args):
             extra_args.append('--target_tmp=tmp-' + '-'.join(c.strip().lower() for c in compute.split(',') if c.strip()))
@@ -160,8 +163,14 @@ class CTask(InitCTask):
                 entry['build'] = build
                 if not compile_only:
                     entry['outputs'] = self._outputs(build)
+                    if status == 'ok':
+                        check = self._check(name, build, checks)
+                        if check:
+                            entry['check'] = check
+                            if not check['ok']:
+                                status = entry['status'] = 'check failed'
             if status != 'ok':
-                entry['error'] = self._tail(log)
+                entry['error'] = (entry['check']['note'] if status == 'check failed' else self._tail(log))
 
             record['runs'].append(entry)
 
@@ -171,6 +180,8 @@ class CTask(InitCTask):
                     x += f' (kernel {entry["kernel_seconds"]} s)'
                 if entry.get('outputs'):
                     x += f', {len(entry["outputs"])} outputs'
+                if entry.get('check', {}).get('ok'):
+                    x += ', check ok'
                 print (x, flush = True)
 
             with open(out, 'w', encoding = 'utf-8', newline = '\n') as f:
@@ -181,13 +192,14 @@ class CTask(InitCTask):
             json.dump(record, f, indent = 1)
 
         bad = [e for e in record['runs'] if e['status'] != 'ok']
+        checked = [e for e in record['runs'] if e.get('check', {}).get('ok')]
         if con:
             print ('')
             for e in bad:
                 x = f' --dataset={e["dataset"]}' if e.get('dataset') else ''
                 print (f'{e["status"].upper():8} {e["program"]} --cmd={e["cmd"]}{x}: {e.get("error", "")[-300:]}')
             print (f'cMeta info: {len(record["runs"]) - len(bad)} of {len(record["runs"])} runs ok on {compute} '
-                   f'({record["host"]}); the record: {out}')
+                   f'({record["host"]})' + (f', {len(checked)} checked' if checks else '') + f'; the record: {out}')
 
         if fail and bad:
             return self.cm.error(f'{len(bad)} of {len(record["runs"])} runs failed (see {out})')
@@ -250,6 +262,26 @@ class CTask(InitCTask):
             aliases = [a for a in aliases if any(fnmatch.fnmatch(a, p) for p in patterns)]
         return {'return': 0, 'aliases': aliases}
 
+    def _check(self, name, build, checks):
+        """
+        The check of a run's output (checks of _desc.yaml, by program pattern): {ok, values, note}, or None when
+        the program has none. Every match of the regular expression in the file must give expect.
+        """
+        spec = next((v for p, v in checks.items() if fnmatch.fnmatch(name, p)), None)
+        if not spec:
+            return None
+        try:
+            with open(os.path.join(build, spec['file']), encoding = 'utf-8', errors = 'replace') as f:
+                values = re.findall(spec['regex'], f.read())
+        except OSError:
+            return {'ok': False, 'values': [], 'note': f'no {spec["file"]} to check'}
+        if not values:
+            return {'ok': False, 'values': [], 'note': f'no line of the check in {spec["file"]} ({spec["regex"]})'}
+        ok = all(str(v) == str(spec['expect']) for v in values)
+        note = '' if ok else f'{spec.get("what") or "check"}: {", ".join(values)} (expected {spec["expect"]})'
+        return {'ok': ok, 'values': values, 'note': note}
+
+    ############################################################
     def _outputs(self, build):
         """{file: {size, sha256}} of the output files the run listed (its _repro_ctx_run.json)."""
         names = []

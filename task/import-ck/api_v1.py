@@ -33,11 +33,13 @@ LIB_XOPENME = 'lib-xopenme,c7b96678a7734510'
 LIB_POLYBENCH = 'lib-polybench,70349e61a532455d'
 LIB_SYSROOT_ANDROID = 'lib-sysroot-android,cdc22b7617f54f2c'
 LIB_CUDA = 'lib-cuda,ac9daedec465409e'
+LIB_OPENCL = 'lib-opencl,c209094321c94530'   # cmeta-aops: the OpenCL headers and the library to link
 
 SUITES = {
     'cbench': 'cBench (MiBench-based, cTuning)',
     'polybench': 'PolyBench/C 3.2 (Ohio State University), CK version',
     'polybench-cuda': 'PolyBench/GPU 1.0 CUDA (Ohio State University, University of Delaware), CK version',
+    'polybench-opencl': 'PolyBench/GPU 1.0 OpenCL (Ohio State University, University of Delaware), CK version',
     'ck-codelet': 'Codelets of the CK paper repository (reproduce-ck-paper): edge detection of an image',
 }
 
@@ -81,13 +83,25 @@ static void ck_dump_close(FILE *f)
 '''
 
 
-CUDA_COMPUTE_MODE_HELPER = '''\
-/* cMeta (task::import-ck): CUDA 13 removed cudaDeviceProp::computeMode - the attribute gives it */
-static int ck_compute_mode_prohibited(int device)
+CUDA_COMPAT = '''\
+/* cMeta (task::import-ck): CUDA 13 removed cudaThreadSynchronize() (deprecated since CUDA 4) and
+   cudaDeviceProp::computeMode. From CUDA 13 on (CUDART_VERSION, set by the headers of the CUDA runtime
+   that nvcc includes), the current calls do the same; an older CUDA keeps the original ones. */
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
+#define cudaThreadSynchronize cudaDeviceSynchronize
+#endif
+
+static int ck_compute_mode_prohibited(int device, const cudaDeviceProp *prop)
 {
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
   int mode = 0;
+  (void) prop;
   cudaDeviceGetAttribute(&mode, cudaDevAttrComputeMode, device);
   return mode == cudaComputeModeProhibited;
+#else
+  (void) device;
+  return prop->computeMode == cudaComputeModeProhibited;
+#endif
 }
 
 '''
@@ -108,6 +122,45 @@ def read_text(path):
         text, encoding = data.decode('latin-1'), 'latin-1'
     newline = '\r\n' if '\r\n' in text else '\n'
     return text.replace('\r\n', '\n'), encoding, newline
+
+
+CPU_CHECK_BLOCK = re.compile(r'^[ \t]*/\*[ \t]*\n(.*?)^[ \t]*\*/[ \t]*$', re.M | re.S)
+
+# The arrays of a PolyBench/GPU main(): (DATA_TYPE*)malloc(<n>*sizeof(DATA_TYPE))
+MALLOC_DATA = re.compile(r'\(DATA_TYPE\s*\*\)\s*malloc\(\s*(.+?)\s*\*\s*sizeof\(DATA_TYPE\)\s*\)')
+MALLOC_ANY = re.compile(r'\(DATA_TYPE\s*\*\)\s*malloc\(')
+
+
+def zeroed_arrays(text):
+    """
+    The arrays of main() allocated zeroed (calloc instead of malloc): (text, number changed), or (text, -1) when
+    an allocation of main() has another form.
+    """
+    main = text.find('int main(')
+    if main < 0:
+        return text, 0
+    head, body = text[:main], text[main:]
+    if len(MALLOC_ANY.findall(body)) != len(MALLOC_DATA.findall(body)):
+        return text, -1
+    body, n = MALLOC_DATA.subn(lambda m: f'(DATA_TYPE*)calloc({m.group(1)}, sizeof(DATA_TYPE))', body)
+    return head + body, n
+
+
+def cpu_check_block(text):
+    """
+    The commented CPU reference of a PolyBench/GPU main() (the comment block, on lines of its own, that holds
+    xopenme_clock_start(1)) as an #ifdef CK_CPU_CHECK block: (text, number of blocks changed).
+    """
+    main = text.find('int main(')
+    if main < 0:
+        return text, 0
+    found = [m for m in CPU_CHECK_BLOCK.finditer(text, main) if 'xopenme_clock_start(1)' in m.group(1)]
+    if len(found) != 1:
+        return text, len(found)
+    m = found[0]
+    block = ('#ifdef CK_CPU_CHECK   /* cMeta: the CPU reference, a comment in the CK version */\n' + m.group(1) +
+             '#endif /* CK_CPU_CHECK */')
+    return text[:m.start()] + block + text[m.end():], 1
 
 
 def write_text(path, text, encoding, newline):
@@ -746,20 +799,70 @@ class CTask(InitCTask):
                 patches.append(f'{f}: print_array writes the arrays into {POLYBENCH_DUMP_FILE} (not the standard streams)')
 
         if family == 'polybench-cuda':
-            # CUDA 13 removed cudaDeviceProp::computeMode and cudaThreadSynchronize (deprecated since CUDA 4)
+            # CUDA 13 removed cudaDeviceProp::computeMode and cudaThreadSynchronize (deprecated since CUDA 4):
+            # a block in front of GPU_argv_init() (the first function that uses either) maps them to the
+            # current calls from CUDA 13 on and keeps the original ones for CUDA 11 and 12
             for f in meta.get('source_files') or []:
                 fp = os.path.join(src_dir, f)
                 text, encoding, newline = read_text(fp)
-                new = re.sub(r'\bcudaThreadSynchronize\s*\(\s*\)', 'cudaDeviceSynchronize()', text)
-                if new != text:
-                    patches.append(f'{f}: cudaDeviceSynchronize() for cudaThreadSynchronize(), which CUDA 13 removed (the same since CUDA 4)')
                 old_check = 'if (deviceProp.computeMode == cudaComputeModeProhibited)'
-                if old_check in new and 'void GPU_argv_init()' in new:
-                    new = new.replace(old_check, 'if (ck_compute_mode_prohibited(gpgpu_device_id))')
-                    new = new.replace('void GPU_argv_init()', CUDA_COMPUTE_MODE_HELPER + 'void GPU_argv_init()', 1)
-                    patches.append(f'{f}: the compute mode of the GPU from cudaDeviceGetAttribute, as CUDA 13 removed cudaDeviceProp::computeMode')
+                if 'void GPU_argv_init()' not in text or old_check not in text:
+                    continue
+                first_use = min(i for i in (text.find('cudaThreadSynchronize'), text.find(old_check)) if i >= 0)
+                if text.find('void GPU_argv_init()') > first_use:
+                    return self.cm.error(f'CK program "{name}": "{f}" uses cudaThreadSynchronize or computeMode before GPU_argv_init()')
+                new = text.replace(old_check, 'if (ck_compute_mode_prohibited(gpgpu_device_id, &deviceProp))')
+                new = new.replace('void GPU_argv_init()', CUDA_COMPAT + 'void GPU_argv_init()', 1)
+                write_text(fp, new, encoding, newline)
+                patches.append(f'{f}: from CUDA 13 on (CUDART_VERSION >= 13000) cudaDeviceSynchronize() for cudaThreadSynchronize() '
+                               'and the compute mode from cudaDeviceGetAttribute - CUDA 13 removed both; CUDA 11 and 12 keep the original calls')
+
+        if family == 'polybench-opencl':
+            # The arrays of platform and device IDs had sizeof(id) * index + 1 BYTES (1 byte for index 0),
+            # while clGetPlatformIDs and clGetDeviceIDs write up to 15 IDs into them: a heap overflow on a
+            # machine with two OpenCL platforms or devices or more
+            for f in meta.get('source_files') or []:
+                fp = os.path.join(src_dir, f)
+                text, encoding, newline = read_text(fp)
+                new = text
+                for kind, index in (('cl_platform_id', 'gpgpu_platform_id'), ('cl_device_id', 'gpgpu_device_id')):
+                    old = f'malloc(sizeof({kind}) * {index}+1)'
+                    if new.count(old) == 1:
+                        new = new.replace(old, f'malloc(sizeof({kind}) * ({index} + 15))  /* cMeta: room for the 15 IDs asked for '
+                                               f'(was sizeof * {index} + 1 bytes) */')
                 if new != text:
                     write_text(fp, new, encoding, newline)
+                    patches.append(f'{f}: the arrays of OpenCL platform and device IDs hold the 15 IDs clGetPlatformIDs and '
+                                   'clGetDeviceIDs may write (they had sizeof(id) * index + 1 bytes: a heap overflow with two '
+                                   'platforms or devices or more)')
+
+        if family in ('polybench-cuda', 'polybench-opencl'):
+            # The CK versions commented out the CPU reference of main() (the block with the CPU kernel's timer,
+            # xopenme_clock_start(1)): their "Non-Matching CPU-GPU Outputs" count compared the GPU's result with
+            # memory never computed. The block is compiled with CK_CPU_CHECK (the hooks define it unless
+            # --compile.check=no), so that the count is a check; the same lines, the comment's two made directives
+            for f in meta.get('source_files') or []:
+                fp = os.path.join(src_dir, f)
+                text, encoding, newline = read_text(fp)
+
+                # The kernels of 3mm, atax, bicg and gesummv add (+=) into arrays that main() sends to the GPU
+                # without initializing them: their result depended on what the memory held (often zero by luck)
+                text, n = zeroed_arrays(text)
+                if n < 0:
+                    return self.cm.error(f'CK program "{name}": an array of main() in "{f}" is not allocated as '
+                                         '(DATA_TYPE*)malloc(<n>*sizeof(DATA_TYPE))')
+                if n:
+                    patches.append(f'{f}: the arrays of main() are allocated zeroed (calloc): kernels that add into an '
+                                   'array main() sends to the GPU uninitialized (3mm, atax, bicg, gesummv) gave results '
+                                   'that depended on what the memory held')
+
+                new, n = cpu_check_block(text)
+                if n != 1:
+                    return self.cm.error(f'CK program "{name}": {n} commented CPU reference blocks in main() of "{f}" (1 expected)')
+                write_text(fp, new, encoding, newline)
+                patches.append(f'{f}: the CPU reference of main() that CK commented out is compiled with CK_CPU_CHECK (defined '
+                               'unless --compile.check=no), so that "Non-Matching CPU-GPU Outputs" compares the GPU\'s result '
+                               'with the CPU\'s')
 
         patch = os.path.join(self.artifact_path, 'files', 'patches', name + '.patch')
         if os.path.isfile(patch):
@@ -831,6 +934,10 @@ class CTask(InitCTask):
             for n in range(1, 4):
                 main = main.replace(f'$#dataset_path#$$#dataset_filename_{n}#$', '{qinput_files.data' + str(n) + '}')
             main = main.replace('$#dataset_number#$', '{{local.ck_number}}')
+            # A file of the program's sources (PolyBench/GPU OpenCL: its kernel): run from the run folder,
+            # where the hooks copy it (host) or push it (device) - ck_run_files
+            run_files = re.findall(r'"?\$#src_path#\$([^"\s]+)"?', main)
+            main = re.sub(r'"?\$#src_path#\$([^"\s]+)"?', r'\1', main)
             if 'cmd_main' in o:
                 main = o['cmd_main']
             if '$#' in main or '<' in main:
@@ -849,6 +956,7 @@ class CTask(InitCTask):
                 outputs = list(o['output_files'])
 
             out[cmd] = {'main': main,
+                        'run_files': run_files,
                         'dataset_tags': ','.join(tags) if uses_dataset else None,
                         'dataset_file': o.get('dataset_file'),
                         'input_files': o.get('input_files', True) and uses_dataset,
@@ -898,6 +1006,7 @@ class CTask(InitCTask):
             if info.get('file'):
                 L.append(f'  file: {q(info["file"])}')
         cuda = family == 'polybench-cuda'
+        opencl = family == 'polybench-opencl'
         L += ['',
              '#' * 99,
              'local_vars:',
@@ -924,6 +1033,18 @@ class CTask(InitCTask):
         L += ['',
               '  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did',
               '  ck_redirect_stdio: True']
+        run_files = sorted({f for c in commands.values() for f in c.get('run_files') or []})
+        if run_files and 'ck_run_files' not in (override.get('local_vars') or {}):
+            L += ['', '  # Files of src/ the run reads from its folder (copied there, pushed to a device)',
+                  '  ck_run_files: ' + json.dumps(run_files)]
+        if opencl:
+            L += ['', '  # The OpenCL platform and device (CK_COMPUTE_PLATFORM_ID, CK_COMPUTE_DEVICE_ID): --opencl_platform,',
+                  '  # --opencl_device=<number or a word of its name>, else the first GPU the opencl target found',
+                  '  ck_opencl_device: True']
+        if family in ('polybench-cuda', 'polybench-opencl'):
+            L += ['', '  # The CPU reference of main(), a comment in the CK version: CK_CPU_CHECK (the hooks), so that',
+                  '  # "Non-Matching CPU-GPU Outputs" is a check; --compile.check=no leaves it out, as CK did',
+                  '  ck_cpu_check: True']
         for k, v in (override.get('local_vars') or {}).items():
             L.append(f'  {k}: ' + json.dumps(v))
         if family == 'polybench':
@@ -944,9 +1065,14 @@ class CTask(InitCTask):
         L += ['', '#' * 99, 'params:']
         if cuda:
             L += ['  compute: cuda']
+        elif opencl:
+            L += ['  compute: opencl']
         L += ['  compile:', '    d:' if ck_vars else '    d: {}']
         for k, v in ck_vars.items():
             L.append(f'      {k}:' + ('' if v == '' or v is None else f' {q(v)}'))
+        if opencl:
+            L += ["      # The OpenCL API these codes use (1.2): the Khronos headers would default to 3.0 and warn",
+                  "      CL_TARGET_OPENCL_VERSION: '120'"]
         if '$<<CK_EXTRA_LIB_M>>$' in (meta.get('extra_ld_vars') or ''):
             L += ['', 'params_os:', '  linux:', '    compile:', '      lib_names:', '        - m']
         if cuda:
@@ -956,7 +1082,7 @@ class CTask(InitCTask):
         L += ['', '#' * 99, 'updates:', '  compile:', '    uses:',
               '      - match:', '          internal_func: customize2', '        append:',
               '          # The run-time libraries (built once per target and cached by task setup)']
-        if family in ('polybench', 'polybench-cuda'):
+        if family in ('polybench', 'polybench-cuda', 'polybench-opencl'):
             L += [f'          - task: {TASK_SETUP}', f'            name: {LIB_POLYBENCH}',
                   '            with:', "              static: '{{params.compile.static|$None}}'", '']
         if family != 'ck-codelet':
@@ -966,6 +1092,20 @@ class CTask(InitCTask):
             L += ['          # The CUDA runtime: its library folder on the run-time path (a CUDA of the cMeta cache',
                   '          # is not on the system\'s)',
                   f'          - task: {TASK_SETUP}', f'            name: {LIB_CUDA}', '']
+        elif opencl:
+            L += ['          # The OpenCL headers and the library to link (Windows: OpenCL.lib; Linux: the ICD loader;',
+                  '          # macOS: the OpenCL framework; Android: a stub of libOpenCL.so); the drivers bring the',
+                  '          # OpenCL library a run loads (on Android the vendor\'s libOpenCL.so)',
+                  f'          - task: {TASK_SETUP}',
+                  "            if: '\"opencl\" in {{global.target.compute|$[]}} or \"android-gpu\" in {{global.target.compute|$[]}}'",
+                  f'            name: {LIB_OPENCL}', '',
+                  '          # Android (android-gpu): the libraries of the NDK sysroot',
+                  f'          - task: {TASK_SETUP}',
+                  "            if: '\"android-gpu\" in {{global.target.compute|$[]}}'",
+                  f'            name: {LIB_SYSROOT_ANDROID}',
+                  '            with:',
+                  "              static: '{{local.params.compile.static|$None}}'",
+                  '              lib_names:', '                - dl', '                - m', '']
         else:
             L += ['          # Android: the libraries of the NDK sysroot',
               f'          - task: {TASK_SETUP}',
@@ -1010,8 +1150,9 @@ class CTask(InitCTask):
         ck_vars = meta.get('build_compiler_vars') or {}
         sizes = ', '.join(f'{k}={v}' for k, v in ck_vars.items() if k not in POLYBENCH_NOT_SIZES)
         libs = (['`lib-xopenme`'] if family != 'ck-codelet' else []) + \
-               (['`lib-polybench`'] if family in ('polybench', 'polybench-cuda') else []) + \
-               (['`lib-cuda`'] if family == 'polybench-cuda' else [])
+               (['`lib-polybench`'] if family in ('polybench', 'polybench-cuda', 'polybench-opencl') else []) + \
+               (['`lib-cuda`'] if family == 'polybench-cuda' else []) + \
+               (['`lib-opencl`'] if family == 'polybench-opencl' else [])
         L = [f'# {name}', '',
              f'{SUITES.get(family, family)}: the CK program `{name}` of `{ck_repo}`, converted to cMeta by',
              '`task::import-ck` of this repository. It inherits `template-c-cpu` and the hooks of',
@@ -1022,14 +1163,25 @@ class CTask(InitCTask):
         for c, v in commands.items():
             x = f' --cmd={c}' if multi else ''
             L.append(f'cx program run {name} {computes[0] if "cpu" not in computes else "cpu"}{x} -q')
-        if 'android-cpu' in computes:
-            L.append(f'cx program run {name} --compute=android-cpu --target_tmp=tmp-android-cpu' +
-                     (f' --cmd={list(commands)[0]}' if multi else '') + ' -q')
+        for device in ('android-cpu', 'android-gpu'):
+            if device in computes:
+                L.append(f'cx program run {name} --compute={device} --target_tmp=tmp-{device}' +
+                         (f' --cmd={list(commands)[0]}' if multi else '') + ' -q')
         L += ['```', '']
+        if family == 'polybench-opencl':
+            L += ['It runs the kernel (the `.cl` file, built by the OpenCL driver at run time) on an OpenCL device:',
+                  'with `opencl`, the first GPU the `opencl` target finds, or `--opencl_device=<number or a word of',
+                  'its name>` (with `--opencl_platform=<number>`), e.g. `--opencl_device=intel`; with `android-gpu`,',
+                  'the GPU of the Android device (its own libOpenCL.so). It prints the platform and the device.', '']
+        if family in ('polybench-cuda', 'polybench-opencl'):
+            L += ['**The check:** the program computes the result on the CPU too and prints how many elements of the',
+                  'GPU\'s result differ from it beyond the threshold of the source (`Non-Matching CPU-GPU Outputs',
+                  'Beyond Error Threshold of <p> Percent: <n>`, on standard output; 0 is right). The CK version had',
+                  'that CPU reference in a comment (so its count compared with memory never computed);',
+                  '`--compile.check=no` builds it so again. The sizes are CK\'s (compile variables).', '']
         if family == 'polybench-cuda':
-            L += ['It runs the kernel on the GPU (`cuda`) and prints how many results differ from the CPU\'s',
-                  '(`Non-Matching CPU-GPU Outputs ...` on standard output); the sizes are CK\'s (compile',
-                  'variables), the GPU and its compute capability are printed first.', '']
+            L += ['It runs the kernel on the GPU (`cuda`), with CUDA 11, 12 or 13 (`--use.nvcc.version=<v>`); the GPU',
+                  'and its compute capability are printed first.', '']
         if any(v['dataset_tags'] for v in commands.values()):
             L += ['The input is a `dataset` artifact selected by tags (with `-q`, the first; without it, a menu):',
                   '`--dataset=<alias>` picks one, `--dataset_file=<file name or path>` a file of it or any local file.', '',

@@ -13,12 +13,16 @@ supported_compute:
     - cpu
   polybench-cuda:
     - cuda
+  polybench-opencl:
+    - android-gpu
+    - opencl
 
 # Prefixes of CK program names: the family decides the libraries and the hooks.
 families:
   cbench-: cbench
   polybench-cpu-: polybench
   polybench-cuda-: polybench-cuda
+  polybench-opencl-: polybench-opencl
   shared-codelet-: ck-codelet
 
 # What the CK meta of a program cannot say by itself. Per CK program, per command:
@@ -166,6 +170,7 @@ licenses_info:
   # release has no licence file; the Ohio State University licence came with 4.1). PolyBench/GPU 1.0 states none.
   polybench: {spdx: GPL-2.0-only, name: 'GNU GPL v2 (PolyBench/C 3.2, copyright 2011-2012 the Ohio State University; the licence of the PolyBench project on SourceForge)', file: src/LICENSE.txt}
   polybench-cuda: {spdx: '', name: 'not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its CUDA codes derive from PolyBench 2.0, GPLv2)', file: src/NOTICE.txt}
+  polybench-opencl: {spdx: '', name: 'not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2)', file: src/NOTICE.txt}
   # The codelets of the CK paper repository (BSD-3-Clause): filter.c is the edge detection of UTDSP, whose
   # authors state no licence; ctuning.c (the timers) is LGPL-2.1-or-later
   shared-codelet-filter: {spdx: '', name: 'filter.c: UTDSP edge detection (copyright 1992 Mazen A.R. Saghir, University of Toronto; no licence stated), changed by Grigori Fursin; ctuning.c: LGPL-2.1-or-later; the CK paper repository: BSD-3-Clause', file: src/LICENSE.txt}
@@ -179,6 +184,8 @@ licenses:
     COPYING: gpl-2.0.txt
   polybench-cuda:
     NOTICE.txt: polybench-gpu-1.0.NOTICE.txt
+  polybench-opencl:
+    NOTICE.txt: polybench-gpu-1.0-opencl.NOTICE.txt
   ck-codelet:
     LICENSE.txt: reproduce-ck-paper.LICENSE.txt
   cbench-consumer-tiff2rgba:

@@ -26,7 +26,24 @@ host_dependent:
     tmp-output1.tmp: the path of the input file is printed
   cbench-security-pgp encode:
     tmp-output.tmp: the signature holds the time it was made
-  # The CPU reference of the CK versions is commented out: the check compares the GPU's result with an
-  # array never computed (malloc), and prints the GPU's name
+  # PolyBench/GPU: standard output names the GPU (and holds the count of the check, see checks)
   polybench-cuda-*:
-    tmp-output1.tmp: the GPU's name, and a check against an array the CK version never computes
+    tmp-output1.tmp: the GPU's name and the count of the check against the CPU
+  polybench-opencl-*:
+    tmp-output1.tmp: the OpenCL platforms and device, and the count of the check against the CPU
+
+# What a run must print: in a file of its build folder, the first group of the regular expression must equal
+# expect (every match). PolyBench/GPU: the converted programs compute the CPU reference that CK commented out
+# (CK_CPU_CHECK) and count the GPU's results that differ from it beyond the threshold of the source. Left out
+# when the runs are built without it (--extra=--compile.check=no).
+checks:
+  polybench-cuda-*:
+    file: tmp-output1.tmp
+    regex: 'Non-Matching CPU-GPU Outputs Beyond Error Threshold of [0-9.]+ Percent: (\d+)'
+    expect: '0'
+    what: GPU results that differ from the CPU's
+  polybench-opencl-*:
+    file: tmp-output1.tmp
+    regex: 'Non-Matching CPU-GPU Outputs Beyond Error Threshold of [0-9.]+ Percent: (\d+)'
+    expect: '0'
+    what: GPU results that differ from the CPU's

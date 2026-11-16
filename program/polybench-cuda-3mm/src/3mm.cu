@@ -127,12 +127,24 @@ void compareResults(DATA_TYPE *G, DATA_TYPE *G_outputFromGpu)
 }
 
 
-/* cMeta (task::import-ck): CUDA 13 removed cudaDeviceProp::computeMode - the attribute gives it */
-static int ck_compute_mode_prohibited(int device)
+/* cMeta (task::import-ck): CUDA 13 removed cudaThreadSynchronize() (deprecated since CUDA 4) and
+   cudaDeviceProp::computeMode. From CUDA 13 on (CUDART_VERSION, set by the headers of the CUDA runtime
+   that nvcc includes), the current calls do the same; an older CUDA keeps the original ones. */
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
+#define cudaThreadSynchronize cudaDeviceSynchronize
+#endif
+
+static int ck_compute_mode_prohibited(int device, const cudaDeviceProp *prop)
 {
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
   int mode = 0;
+  (void) prop;
   cudaDeviceGetAttribute(&mode, cudaDevAttrComputeMode, device);
   return mode == cudaComputeModeProhibited;
+#else
+  (void) device;
+  return prop->computeMode == cudaComputeModeProhibited;
+#endif
 }
 
 void GPU_argv_init()
@@ -149,7 +161,7 @@ void GPU_argv_init()
 
   cudaGetDeviceProperties(&deviceProp, gpgpu_device_id);
 
-  if (ck_compute_mode_prohibited(gpgpu_device_id))
+  if (ck_compute_mode_prohibited(gpgpu_device_id, &deviceProp))
   {
     printf("Error: device is running in <Compute Mode Prohibited>, no threads can use ::cudaSetDevice().\n");
     exit(EXIT_SUCCESS);
@@ -376,11 +388,11 @@ void mm3Cuda(DATA_TYPE* A, DATA_TYPE* B, DATA_TYPE* C, DATA_TYPE* D, DATA_TYPE* 
 
 //	t_start = rtclock();
 	mm3_kernel1<<<grid1,block>>>(A_gpu, B_gpu, E_gpu);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	mm3_kernel2<<<grid2,block>>>(C_gpu, D_gpu, F_gpu);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 	mm3_kernel3<<<grid3,block>>>(E_gpu, F_gpu, G_gpu);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 //	t_end = rtclock();
 
 	error=cudaMemcpy(G_outputFromGpu, G_gpu, sizeof(DATA_TYPE) * NI * NL, cudaMemcpyDeviceToHost);
@@ -429,14 +441,14 @@ int main(int argc, char** argv)
   /* Run kernel. */
   if (getenv("CT_REPEAT_MAIN")!=NULL) ct_repeat_max=atol(getenv("CT_REPEAT_MAIN"));
 
-  A = (DATA_TYPE*)malloc(NI*NK*sizeof(DATA_TYPE));
-  B = (DATA_TYPE*)malloc(NK*NJ*sizeof(DATA_TYPE));
-  C = (DATA_TYPE*)malloc(NJ*NM*sizeof(DATA_TYPE));
-  D = (DATA_TYPE*)malloc(NM*NL*sizeof(DATA_TYPE));
-  E = (DATA_TYPE*)malloc(NI*NJ*sizeof(DATA_TYPE));
-  F = (DATA_TYPE*)malloc(NJ*NL*sizeof(DATA_TYPE));
-  G = (DATA_TYPE*)malloc(NI*NL*sizeof(DATA_TYPE));
-  G_outputFromGpu = (DATA_TYPE*)malloc(NI*NL*sizeof(DATA_TYPE));
+  A = (DATA_TYPE*)calloc(NI*NK, sizeof(DATA_TYPE));
+  B = (DATA_TYPE*)calloc(NK*NJ, sizeof(DATA_TYPE));
+  C = (DATA_TYPE*)calloc(NJ*NM, sizeof(DATA_TYPE));
+  D = (DATA_TYPE*)calloc(NM*NL, sizeof(DATA_TYPE));
+  E = (DATA_TYPE*)calloc(NI*NJ, sizeof(DATA_TYPE));
+  F = (DATA_TYPE*)calloc(NJ*NL, sizeof(DATA_TYPE));
+  G = (DATA_TYPE*)calloc(NI*NL, sizeof(DATA_TYPE));
+  G_outputFromGpu = (DATA_TYPE*)calloc(NI*NL, sizeof(DATA_TYPE));
 
   srand(1);
   init_array(A, B, C, D);
@@ -459,7 +471,7 @@ int main(int argc, char** argv)
   openme_callback("ACC_KERNEL_END", NULL);
 #endif
 
-/*
+#ifdef CK_CPU_CHECK   /* cMeta: the CPU reference, a comment in the CK version */
   srand(1);
   init_array(A, B, C, D);
 
@@ -479,7 +491,7 @@ int main(int argc, char** argv)
 #ifdef OPENME
   openme_callback("KERNEL_END", NULL);
 #endif
-*/
+#endif /* CK_CPU_CHECK */
 
   compareResults(G, G_outputFromGpu);
 

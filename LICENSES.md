@@ -94,6 +94,26 @@ in the file named, in the program's folder.
 | `program/polybench-cuda-syr2k` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its CUDA codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
 | `program/polybench-cuda-syrk` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its CUDA codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
 
+### PolyBench/GPU 1.0 OpenCL (Ohio State University, University of Delaware), CK version
+
+| Program | Licence | SPDX | Text |
+|---|---|---|---|
+| `program/polybench-opencl-2dconv` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-2mm` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-3dconv` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-3mm` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-atax` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-bicg` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-corr` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-covar` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-fdtd-2d` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-gemm` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-gesummv` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-gramschm` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-mvt` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-syr2k` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+| `program/polybench-opencl-syrk` | not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2) | - | `src/NOTICE.txt` |
+
 ### Codelets of the CK paper repository (reproduce-ck-paper): edge detection of an image
 
 | Program | Licence | SPDX | Text |

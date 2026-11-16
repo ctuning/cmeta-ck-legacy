@@ -1,0 +1,13 @@
+# mvt.cl: the kernels' DATA_TYPE is float, as the host's (CK: DATA_TYPE=float); in double they
+#   read and wrote past the buffers the host made for floats, and reading the result back failed
+--- a/mvt.cl
++++ b/mvt.cl
+@@ -13,7 +13,7 @@
+ #pragma OPENCL EXTENSION cl_amd_fp64 : enable
+ #endif
+ 
+-typedef double DATA_TYPE;
++typedef float DATA_TYPE;  /* cMeta: as the host (CK: DATA_TYPE=float); was double */
+ 
+ 
+ 

@@ -1,0 +1,13 @@
+# bicg.c: the GPU's s is read back too (only q was): compareResults compares both, as the CUDA
+#   version reads both - the check compared the CPU's s with memory the GPU never wrote
+--- a/bicg.c
++++ b/bicg.c
+@@ -431,6 +431,8 @@
+     cl_launch_kernel();
+ 
+     err_code = clEnqueueReadBuffer(clCommandQue, q_mem_obj, CL_TRUE, 0, NX*sizeof(DATA_TYPE), q_outputFromGpu, 0, NULL, NULL);
++    /* cMeta: s too, as the CUDA version reads it (compareResults compares both) */
++    err_code |= clEnqueueReadBuffer(clCommandQue, s_mem_obj, CL_TRUE, 0, NY*sizeof(DATA_TYPE), s_outputFromGpu, 0, NULL, NULL);
+     if(err_code != CL_SUCCESS)
+     {
+       printf("Error in reading GPU mem\n");

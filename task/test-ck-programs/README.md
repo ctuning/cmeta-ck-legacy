@@ -21,3 +21,9 @@ Windows' line ends (`\r\n`) as `\n` and every spelling of NaN (`-nan(ind)`, `-na
 names - without comparing them - the outputs that hold something of the host or of the moment
 (`host_dependent` in `_desc.yaml`: the path of an input, the time of a signature, progress on standard
 error). When outputs differ, it shows which records agree with which (A, B ...).
+
+A run is also checked when the program declares what it must print (`checks` in `_desc.yaml`: a file of the
+build folder, a regular expression, the value its group must have): the PolyBench/GPU programs (CUDA,
+OpenCL) compare the GPU's result with the CPU's and print how many values differ beyond the threshold of
+the source - a run whose count is not 0 is `check failed` (the record keeps the count). Runs built without
+the CPU reference (`--extra=--compile.check=no`, as CK built them) are not checked.

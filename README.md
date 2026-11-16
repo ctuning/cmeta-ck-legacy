@@ -33,18 +33,27 @@ still accepted (`--capture`); they are not published.
 ## cBench, PolyBench/C and PolyBench/GPU programs, their inputs
 
 `task/import-ck` converted the CK programs cBench (22), PolyBench/C 3.2 CPU (27) and PolyBench/GPU 1.0
-CUDA (15) and their small inputs into `program/` and `dataset/`. They inherit `template-c-cpu` and the
-hooks of `template-ck-program` (cmeta-aops, so they need a cmeta-aops with that template), use its
-run-time libraries (`lib-xopenme`, `lib-polybench`, `lib-cuda`) and run on the host CPU of Windows (MSVC,
-clang), Linux (GCC, clang) and macOS (clang), on Android (`--compute=android-cpu`) and, the PolyBench/GPU
-ones, on an NVIDIA GPU (`--compute=cuda`):
+CUDA (15) and OpenCL (15) and their small inputs into `program/` and `dataset/`. They inherit
+`template-c-cpu` and the hooks of `template-ck-program` (cmeta-aops, so they need a cmeta-aops with that
+template), use its run-time libraries (`lib-xopenme`, `lib-polybench`, `lib-cuda`, `lib-opencl`) and run
+on the host CPU of Windows (MSVC, clang), Linux (GCC, clang) and macOS (clang), on Android
+(`--compute=android-cpu`) and, the PolyBench/GPU ones, on an NVIDIA GPU (`--compute=cuda`) or any OpenCL
+device (`--compute=opencl`; `--compute=android-gpu` on an Android device):
 
 ```sh
 cx program run cbench-consumer-jpeg-c cpu -q
 cx program run cbench-bzip2 cpu --cmd=decode -q
 cx program run polybench-cpu-2mm cpu --compile.size=large -q
 cx program run polybench-cuda-gemm cuda -q
+cx program run polybench-opencl-gemm opencl -q
 ```
+
+The CUDA programs build with CUDA 11, 12 and 13 (`--use.nvcc.version=11.8`; the toolkit is taken from the
+system or installed into the cMeta cache, with a host compiler it accepts - on Linux with glibc 2.41 and
+newer only CUDA 13, which cMeta says); the OpenCL ones run on the first GPU the `opencl` target finds, or
+`--opencl_device=<number or a word of its name>` (`--opencl_device=intel`), and on the GPU of an Android
+device (`--compute=android-gpu`). Both check their result against the CPU's (the reference CK left in a
+comment; `--compile.check=no` builds them as CK did).
 
 The full cTuning MiDataSets (491 inputs, about 20 per program) are datasets too
 (`dataset/ctuning-<kind>-<nnnn>`); `task/get-ctuning-dataset` fetches their files on demand from the

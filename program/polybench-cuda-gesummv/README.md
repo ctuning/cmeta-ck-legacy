@@ -11,9 +11,14 @@ PolyBench/GPU 1.0 CUDA (Ohio State University, University of Delaware), CK versi
 cx program run polybench-cuda-gesummv cuda -q
 ```
 
-It runs the kernel on the GPU (`cuda`) and prints how many results differ from the CPU's
-(`Non-Matching CPU-GPU Outputs ...` on standard output); the sizes are CK's (compile
-variables), the GPU and its compute capability are printed first.
+**The check:** the program computes the result on the CPU too and prints how many elements of the
+GPU's result differ from it beyond the threshold of the source (`Non-Matching CPU-GPU Outputs
+Beyond Error Threshold of <p> Percent: <n>`, on standard output; 0 is right). The CK version had
+that CPU reference in a comment (so its count compared with memory never computed);
+`--compile.check=no` builds it so again. The sizes are CK's (compile variables).
+
+It runs the kernel on the GPU (`cuda`), with CUDA 11, 12 or 13 (`--use.nvcc.version=<v>`); the GPU
+and its compute capability are printed first.
 
 `--repeat=<n>` repeats the kernel n times (`CT_REPEAT_MAIN`). Standard output and error go to
 `tmp-output1.tmp` and `tmp-output2.tmp` of the build folder (not on iOS); the times of the
@@ -23,8 +28,9 @@ kernel, from xOpenME, are in the result (`stats-xopenme`, `tmp-ck-timer.json`).
 
 Only where they would not build or run on every target:
 
-- gesummv.cu: cudaDeviceSynchronize() for cudaThreadSynchronize(), which CUDA 13 removed (the same since CUDA 4)
-- gesummv.cu: the compute mode of the GPU from cudaDeviceGetAttribute, as CUDA 13 removed cudaDeviceProp::computeMode
+- gesummv.cu: from CUDA 13 on (CUDART_VERSION >= 13000) cudaDeviceSynchronize() for cudaThreadSynchronize() and the compute mode from cudaDeviceGetAttribute - CUDA 13 removed both; CUDA 11 and 12 keep the original calls
+- gesummv.cu: the arrays of main() are allocated zeroed (calloc): kernels that add into an array main() sends to the GPU uninitialized (3mm, atax, bicg, gesummv) gave results that depended on what the memory held
+- gesummv.cu: the CPU reference of main() that CK commented out is compiled with CK_CPU_CHECK (defined unless --compile.check=no), so that "Non-Matching CPU-GPU Outputs" compares the GPU's result with the CPU's
 
 ## Licence
 

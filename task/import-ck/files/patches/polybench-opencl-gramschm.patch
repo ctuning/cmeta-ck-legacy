@@ -1,0 +1,28 @@
+# gramschmidt.c: the work-group sizes by the names CK gave them (LWS_X, LWS_Y); the launch kept
+#   the old names DIM_THREAD_BLOCK_X and _Y, defined nowhere - it did not compile
+# gramschmidt.cl: the kernels' DATA_TYPE is float, as the host's (CK: DATA_TYPE=float); in double
+#   they read and wrote past the buffers the host made for floats
+--- a/gramschmidt.c
++++ b/gramschmidt.c
+@@ -52,6 +52,10 @@
+ #ifndef LWS_Y
+ #define LWS_Y 1
+ #endif
++
++/* cMeta: the launch below uses the names these sizes had before CK renamed them */
++#define DIM_THREAD_BLOCK_X LWS_X
++#define DIM_THREAD_BLOCK_Y LWS_Y
+ 
+ #if defined(cl_khr_fp64)  // Khronos extension available?
+ #pragma OPENCL EXTENSION cl_khr_fp64 : enable
+--- a/gramschmidt.cl
++++ b/gramschmidt.cl
+@@ -13,7 +13,7 @@
+ #pragma OPENCL EXTENSION cl_amd_fp64 : enable
+ #endif
+ 
+-typedef double DATA_TYPE;
++typedef float DATA_TYPE;  /* cMeta: as the host (CK: DATA_TYPE=float); was double */
+ 
+ 
+ __kernel void gramschmidt_kernel1(__global DATA_TYPE *a, __global DATA_TYPE *r, __global DATA_TYPE *q, int k, int m, int n)

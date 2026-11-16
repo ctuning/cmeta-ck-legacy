@@ -1,0 +1,130 @@
+authors: Grigori Fursin
+inherits:
+  - template-c-cpu,649899ef3f004e4a
+  - template-ck-program,f7fab3bed78041d1       # the hooks of converted programs (cmeta-aops)
+
+# Converted from the Collective Knowledge (CK) format by task::import-ck; see README.md.
+origin:
+  suite: 'PolyBench/GPU 1.0 OpenCL (Ohio State University, University of Delaware), CK version'
+  ck_repo: 'ctuning/ck-ml'
+  ck_entry: 'program:polybench-opencl-gemm'
+  ck_uid: '050feb15cb44e1ac'
+  ck_created: '2012-07-08'
+  converted: '2026-11-16 by task::import-ck'
+  # What was changed in the CK sources, and why
+  patches:
+    - 'gemm.c: the arrays of OpenCL platform and device IDs hold the 15 IDs clGetPlatformIDs and clGetDeviceIDs may write (they had sizeof(id) * index + 1 bytes: a heap overflow with two platforms or devices or more)'
+    - 'gemm.c: the arrays of main() are allocated zeroed (calloc): kernels that add into an array main() sends to the GPU uninitialized (3mm, atax, bicg, gesummv) gave results that depended on what the memory held'
+    - 'gemm.c: the CPU reference of main() that CK commented out is compiled with CK_CPU_CHECK (defined unless --compile.check=no), so that "Non-Matching CPU-GPU Outputs" compares the GPU''s result with the CPU''s'
+
+# The licence of the sources (the cMeta description and hooks: Apache-2.0)
+license:
+  name: 'not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2)'
+  file: 'src/NOTICE.txt'
+
+###################################################################################################
+local_vars:
+  lang: c
+
+  src_file_names:
+    - 'gemm.c'
+
+  target_file_name: 'gemm'
+
+  output_files:
+    - 'tmp-ck-timer.json'
+
+  result_files:
+    stats-xopenme: tmp-ck-timer.json
+
+  run_time_env:
+    CMETA_TARGETS: '{{global.target.cmeta_targets}}'
+    CT_REPEAT_MAIN: '{{local.params.repeat|1}}'
+
+  # Hooks of template-ck-program (customize_ck_run): standard output and error into files, as CK did
+  ck_redirect_stdio: True
+
+  # Files of src/ the run reads from its folder (copied there, pushed to a device)
+  ck_run_files: ["gemm.cl"]
+
+  # The OpenCL platform and device (CK_COMPUTE_PLATFORM_ID, CK_COMPUTE_DEVICE_ID): --opencl_platform,
+  # --opencl_device=<number or a word of its name>, else the first GPU the opencl target found
+  ck_opencl_device: True
+
+  # The CPU reference of main(), a comment in the CK version: CK_CPU_CHECK (the hooks), so that
+  # "Non-Matching CPU-GPU Outputs" is a check; --compile.check=no leaves it out, as CK did
+  ck_cpu_check: True
+
+  # Where CK measured the time goes (hot_functions)
+  ck_hot_functions:
+    default: ["kernel_gemm"]
+
+###################################################################################################
+params:
+  compute: opencl
+  compile:
+    d:
+      DATA_TYPE: 'float'
+      LWS_X: '32'
+      LWS_Y: '8'
+      NI: '512'
+      NJ: '512'
+      NK: '512'
+      XOPENME:
+      # The OpenCL API these codes use (1.2): the Khronos headers would default to 3.0 and warn
+      CL_TARGET_OPENCL_VERSION: '120'
+
+params_os:
+  linux:
+    compile:
+      lib_names:
+        - m
+
+###################################################################################################
+updates:
+  compile:
+    uses:
+      - match:
+          internal_func: customize2
+        append:
+          # The run-time libraries (built once per target and cached by task setup)
+          - task: setup,a2f9b61079ce4333
+            name: lib-polybench,70349e61a532455d
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          - task: setup,a2f9b61079ce4333
+            name: lib-xopenme,c7b96678a7734510
+            with:
+              static: '{{params.compile.static|$None}}'
+
+          # The OpenCL headers and the library to link (Windows: OpenCL.lib; Linux: the ICD loader;
+          # macOS: the OpenCL framework; Android: a stub of libOpenCL.so); the drivers bring the
+          # OpenCL library a run loads (on Android the vendor's libOpenCL.so)
+          - task: setup,a2f9b61079ce4333
+            if: '"opencl" in {{global.target.compute|$[]}} or "android-gpu" in {{global.target.compute|$[]}}'
+            name: lib-opencl,c209094321c94530
+
+          # Android (android-gpu): the libraries of the NDK sysroot
+          - task: setup,a2f9b61079ce4333
+            if: '"android-gpu" in {{global.target.compute|$[]}}'
+            name: lib-sysroot-android,cdc22b7617f54f2c
+            with:
+              static: '{{local.params.compile.static|$None}}'
+              lib_names:
+                - dl
+                - m
+
+  run:
+    uses:
+      - match:
+          internal_func: customize_run
+        append:
+          - internal_func: customize_ck_run
+            internal_func_from_local_key: selected-program
+            internal_func_safe: True
+
+      - match:
+          task: setup-run,148f6c1fdb4247df
+        update:
+          cmd_main: 'gemm.cl {{local.ck_redirects|}}'

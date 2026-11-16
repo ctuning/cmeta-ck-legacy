@@ -142,12 +142,24 @@ void compareResults(DATA_TYPE* hz1, DATA_TYPE* hz2)
 }
 
 
-/* cMeta (task::import-ck): CUDA 13 removed cudaDeviceProp::computeMode - the attribute gives it */
-static int ck_compute_mode_prohibited(int device)
+/* cMeta (task::import-ck): CUDA 13 removed cudaThreadSynchronize() (deprecated since CUDA 4) and
+   cudaDeviceProp::computeMode. From CUDA 13 on (CUDART_VERSION, set by the headers of the CUDA runtime
+   that nvcc includes), the current calls do the same; an older CUDA keeps the original ones. */
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
+#define cudaThreadSynchronize cudaDeviceSynchronize
+#endif
+
+static int ck_compute_mode_prohibited(int device, const cudaDeviceProp *prop)
 {
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
   int mode = 0;
+  (void) prop;
   cudaDeviceGetAttribute(&mode, cudaDevAttrComputeMode, device);
   return mode == cudaComputeModeProhibited;
+#else
+  (void) device;
+  return prop->computeMode == cudaComputeModeProhibited;
+#endif
 }
 
 void GPU_argv_init()
@@ -164,7 +176,7 @@ void GPU_argv_init()
 
   cudaGetDeviceProperties(&deviceProp, gpgpu_device_id);
 
-  if (ck_compute_mode_prohibited(gpgpu_device_id))
+  if (ck_compute_mode_prohibited(gpgpu_device_id, &deviceProp))
   {
     printf("Error: device is running in <Compute Mode Prohibited>, no threads can use ::cudaSetDevice().\n");
     exit(EXIT_SUCCESS);
@@ -299,11 +311,11 @@ void fdtdCuda(DATA_TYPE* _fict_, DATA_TYPE* ex, DATA_TYPE* ey, DATA_TYPE* hz, DA
 	for(int t = 0; t< tmax; t++)
 	{
 		fdtd_step1_kernel<<<grid,block>>>(_fict_gpu, ex_gpu, ey_gpu, hz_gpu, t);
-		cudaDeviceSynchronize();
+		cudaThreadSynchronize();
 		fdtd_step2_kernel<<<grid,block>>>(ex_gpu, ey_gpu, hz_gpu, t);
-		cudaDeviceSynchronize();
+		cudaThreadSynchronize();
 		fdtd_step3_kernel<<<grid,block>>>(ex_gpu, ey_gpu, hz_gpu, t);
-		cudaDeviceSynchronize();
+		cudaThreadSynchronize();
 	}
 	
 //	t_end = rtclock();
@@ -349,11 +361,11 @@ int main()
   /* Run kernel. */
   if (getenv("CT_REPEAT_MAIN")!=NULL) ct_repeat_max=atol(getenv("CT_REPEAT_MAIN"));
 
-  _fict_ = (DATA_TYPE*)malloc(tmax*sizeof(DATA_TYPE));
-  ex = (DATA_TYPE*)malloc(NX*(NY+1)*sizeof(DATA_TYPE));
-  ey = (DATA_TYPE*)malloc((NX+1)*NY*sizeof(DATA_TYPE));
-  hz = (DATA_TYPE*)malloc(NX*NY*sizeof(DATA_TYPE));
-  hz_outputFromGpu = (DATA_TYPE*)malloc(NX*NY*sizeof(DATA_TYPE));
+  _fict_ = (DATA_TYPE*)calloc(tmax, sizeof(DATA_TYPE));
+  ex = (DATA_TYPE*)calloc(NX*(NY+1), sizeof(DATA_TYPE));
+  ey = (DATA_TYPE*)calloc((NX+1)*NY, sizeof(DATA_TYPE));
+  hz = (DATA_TYPE*)calloc(NX*NY, sizeof(DATA_TYPE));
+  hz_outputFromGpu = (DATA_TYPE*)calloc(NX*NY, sizeof(DATA_TYPE));
 
   srand(1);
   init_arrays(_fict_, ex, ey, hz);
@@ -376,7 +388,7 @@ int main()
   openme_callback("ACC_KERNEL_END", NULL);
 #endif
 
-/*
+#ifdef CK_CPU_CHECK   /* cMeta: the CPU reference, a comment in the CK version */
   srand(1);
   init_arrays(_fict_, ex, ey, hz);
 
@@ -396,7 +408,7 @@ int main()
 #ifdef OPENME
   openme_callback("KERNEL_END", NULL);
 #endif
-*/
+#endif /* CK_CPU_CHECK */
 
   compareResults(hz, hz_outputFromGpu);
 

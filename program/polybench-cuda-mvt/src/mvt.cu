@@ -122,12 +122,24 @@ void compareResults(DATA_TYPE* x1, DATA_TYPE* x1_outputFromGpu, DATA_TYPE* x2, D
 }
 
 
-/* cMeta (task::import-ck): CUDA 13 removed cudaDeviceProp::computeMode - the attribute gives it */
-static int ck_compute_mode_prohibited(int device)
+/* cMeta (task::import-ck): CUDA 13 removed cudaThreadSynchronize() (deprecated since CUDA 4) and
+   cudaDeviceProp::computeMode. From CUDA 13 on (CUDART_VERSION, set by the headers of the CUDA runtime
+   that nvcc includes), the current calls do the same; an older CUDA keeps the original ones. */
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
+#define cudaThreadSynchronize cudaDeviceSynchronize
+#endif
+
+static int ck_compute_mode_prohibited(int device, const cudaDeviceProp *prop)
 {
+#if defined(CUDART_VERSION) && CUDART_VERSION >= 13000
   int mode = 0;
+  (void) prop;
   cudaDeviceGetAttribute(&mode, cudaDevAttrComputeMode, device);
   return mode == cudaComputeModeProhibited;
+#else
+  (void) device;
+  return prop->computeMode == cudaComputeModeProhibited;
+#endif
 }
 
 void GPU_argv_init()
@@ -144,7 +156,7 @@ void GPU_argv_init()
 
   cudaGetDeviceProperties(&deviceProp, gpgpu_device_id);
 
-  if (ck_compute_mode_prohibited(gpgpu_device_id))
+  if (ck_compute_mode_prohibited(gpgpu_device_id, &deviceProp))
   {
     printf("Error: device is running in <Compute Mode Prohibited>, no threads can use ::cudaSetDevice().\n");
     exit(EXIT_SUCCESS);
@@ -276,7 +288,7 @@ void mvtCuda(DATA_TYPE* a, DATA_TYPE* x1, DATA_TYPE* x2, DATA_TYPE* y_1, DATA_TY
 //	t_start = rtclock();
 	mvt_kernel1<<<grid,block>>>(a_gpu,x1_gpu,y_1_gpu);
 	mvt_kernel2<<<grid,block>>>(a_gpu,x2_gpu,y_2_gpu);
-	cudaDeviceSynchronize();
+	cudaThreadSynchronize();
 //	t_end = rtclock();
 //	fprintf(stdout, "GPU Runtime: %0.6lfs\n", t_end - t_start);
 
@@ -328,13 +340,13 @@ int main()
   /* Run kernel. */
   if (getenv("CT_REPEAT_MAIN")!=NULL) ct_repeat_max=atol(getenv("CT_REPEAT_MAIN"));
 
-  a = (DATA_TYPE*)malloc(NJ*NJ*sizeof(DATA_TYPE));
-  x1 = (DATA_TYPE*)malloc(NJ*sizeof(DATA_TYPE));
-  x2 = (DATA_TYPE*)malloc(NJ*sizeof(DATA_TYPE));
-  x1_outputFromGpu = (DATA_TYPE*)malloc(NJ*sizeof(DATA_TYPE));
-  x2_outputFromGpu = (DATA_TYPE*)malloc(NJ*sizeof(DATA_TYPE));
-  y_1 = (DATA_TYPE*)malloc(NJ*sizeof(DATA_TYPE));
-  y_2 = (DATA_TYPE*)malloc(NJ*sizeof(DATA_TYPE));
+  a = (DATA_TYPE*)calloc(NJ*NJ, sizeof(DATA_TYPE));
+  x1 = (DATA_TYPE*)calloc(NJ, sizeof(DATA_TYPE));
+  x2 = (DATA_TYPE*)calloc(NJ, sizeof(DATA_TYPE));
+  x1_outputFromGpu = (DATA_TYPE*)calloc(NJ, sizeof(DATA_TYPE));
+  x2_outputFromGpu = (DATA_TYPE*)calloc(NJ, sizeof(DATA_TYPE));
+  y_1 = (DATA_TYPE*)calloc(NJ, sizeof(DATA_TYPE));
+  y_2 = (DATA_TYPE*)calloc(NJ, sizeof(DATA_TYPE));
 
   srand(1);
   init_array(a, x1, x2, y_1, y_2);
@@ -357,7 +369,7 @@ int main()
   openme_callback("ACC_KERNEL_END", NULL);
 #endif
 
-/*
+#ifdef CK_CPU_CHECK   /* cMeta: the CPU reference, a comment in the CK version */
    srand(1);
   init_array(a, x1, x2, y_1, y_2);
 
@@ -377,7 +389,7 @@ int main()
 #ifdef OPENME
   openme_callback("KERNEL_END", NULL);
 #endif
-*/
+#endif /* CK_CPU_CHECK */
 
   compareResults(x1, x1_outputFromGpu, x2, x2_outputFromGpu);
 
