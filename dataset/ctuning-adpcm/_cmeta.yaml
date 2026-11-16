@@ -1,0 +1,17 @@
+artifact: a6e0136160b94181
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-16T06:51:48.898183+00:00'
+desc: 'cBench inputs adpcm (cTuning MiDataSets): 20 inputs, adpcm-0001 with its files
+  here, the others on demand.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- audio
+- adpcm

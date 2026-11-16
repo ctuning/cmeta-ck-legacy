@@ -1,0 +1,174 @@
+authors: Grigori Fursin
+description: 'cBench inputs image-tiff-nocomp (cTuning MiDataSets): 30 inputs (image-tiff-0001-nocomp ... image-tiff-0030-nocomp), image-tiff-0001-nocomp with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder image-tiff-nocomp), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+
+# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
+# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# machine): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-hf-dataset,9865f4ce243f4984
+    repo: 'ctuning/cTuning-MiDataSets'
+    filename: 'image-tiff-nocomp/*'
+result_from_ctx: '{{global.get-hf-dataset}}'
+sub_datasets_folder: 'image-tiff-nocomp'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-image-tiff-nocomp/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  image-tiff-0001-nocomp:
+    desc: 'the small input of cBench (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 101504
+    ck: {entry: 'dataset:image-tiff-0001-nocomp', uid: '10940288188e25e6', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0002-nocomp:
+    desc: 'input 2 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 164604
+    ck: {entry: 'dataset:image-tiff-0002-nocomp', uid: 'a303f44f649339b9', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0003-nocomp:
+    desc: 'input 3 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 25242232
+    ck: {entry: 'dataset:image-tiff-0003-nocomp', uid: '9bb0ef371039ace1', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0004-nocomp:
+    desc: 'input 4 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 992662
+    ck: {entry: 'dataset:image-tiff-0004-nocomp', uid: '183f9087e947cfaa', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0005-nocomp:
+    desc: 'input 5 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 34804
+    ck: {entry: 'dataset:image-tiff-0005-nocomp', uid: '4bf2b5dfde6d3db2', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0006-nocomp:
+    desc: 'input 6 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 67884
+    ck: {entry: 'dataset:image-tiff-0006-nocomp', uid: '6eadbed405d121e7', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0007-nocomp:
+    desc: 'input 7 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 922872
+    ck: {entry: 'dataset:image-tiff-0007-nocomp', uid: 'e999908f945058c7', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0008-nocomp:
+    desc: 'input 8 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 235254
+    ck: {entry: 'dataset:image-tiff-0008-nocomp', uid: '780697f5414a4e75', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0009-nocomp:
+    desc: 'input 9 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 348488
+    ck: {entry: 'dataset:image-tiff-0009-nocomp', uid: 'e034d9286f4a52d4', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0010-nocomp:
+    desc: 'input 10 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 203406
+    ck: {entry: 'dataset:image-tiff-0010-nocomp', uid: 'fd29cd1184473b06', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0011-nocomp:
+    desc: 'input 11 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 73382848
+    ck: {entry: 'dataset:image-tiff-0011-nocomp', uid: 'fd4c1dd334e2a9df', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0012-nocomp:
+    desc: 'input 12 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 262512
+    ck: {entry: 'dataset:image-tiff-0012-nocomp', uid: '0848ca9d6e0654a7', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0013-nocomp:
+    desc: 'input 13 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 312448
+    ck: {entry: 'dataset:image-tiff-0013-nocomp', uid: '2da4333b31f10262', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0014-nocomp:
+    desc: 'input 14 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 318630
+    ck: {entry: 'dataset:image-tiff-0014-nocomp', uid: 'f242ccaecdeb84dc', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0015-nocomp:
+    desc: 'input 15 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 2968772
+    ck: {entry: 'dataset:image-tiff-0015-nocomp', uid: 'a8a569e0ebcb59e0', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0016-nocomp:
+    desc: 'input 16 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 600984
+    ck: {entry: 'dataset:image-tiff-0016-nocomp', uid: '06e1aaf744e28ad2', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0017-nocomp:
+    desc: 'input 17 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 143589688
+    ck: {entry: 'dataset:image-tiff-0017-nocomp', uid: '08539161336fc8e6', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0018-nocomp:
+    desc: 'input 18 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 342766
+    ck: {entry: 'dataset:image-tiff-0018-nocomp', uid: '6d679431a972b37b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0019-nocomp:
+    desc: 'input 19 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 917112
+    ck: {entry: 'dataset:image-tiff-0019-nocomp', uid: 'd03b2b14bbe9a6f3', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0020-nocomp:
+    desc: 'input 20 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 414776
+    ck: {entry: 'dataset:image-tiff-0020-nocomp', uid: '07cf03faf24af6ba', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0021-nocomp:
+    desc: 'input 21 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 182236
+    ck: {entry: 'dataset:image-tiff-0021-nocomp', uid: 'f5de24a9eb76f07b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0022-nocomp:
+    desc: 'input 22 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 992112
+    ck: {entry: 'dataset:image-tiff-0022-nocomp', uid: '79d5eb209242f298', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0023-nocomp:
+    desc: 'input 23 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 1467896
+    ck: {entry: 'dataset:image-tiff-0023-nocomp', uid: '91e0b5588f24f1b9', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0024-nocomp:
+    desc: 'input 24 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 379542
+    ck: {entry: 'dataset:image-tiff-0024-nocomp', uid: '77653e8837d478e9', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0025-nocomp:
+    desc: 'input 25 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 974292
+    ck: {entry: 'dataset:image-tiff-0025-nocomp', uid: '38a2960e3904abeb', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0026-nocomp:
+    desc: 'input 26 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 563412
+    ck: {entry: 'dataset:image-tiff-0026-nocomp', uid: '19a536aca4693039', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0027-nocomp:
+    desc: 'input 27 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 297152
+    ck: {entry: 'dataset:image-tiff-0027-nocomp', uid: 'd28d48cca9b57ea1', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0028-nocomp:
+    desc: 'input 28 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 65178
+    ck: {entry: 'dataset:image-tiff-0028-nocomp', uid: '6f6f2f45f69d7507', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0029-nocomp:
+    desc: 'input 29 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 664632
+    ck: {entry: 'dataset:image-tiff-0029-nocomp', uid: '182f4635811688ac', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-tiff-0030-nocomp:
+    desc: 'input 30 of 30 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.tiff']
+    size: 1200448
+    ck: {entry: 'dataset:image-tiff-0030-nocomp', uid: 'ec89e3b84b3b8b67', created: '2012-04-12', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets'
+  hub: 'ctuning/cTuning-MiDataSets'
+  capsule: '20261115.ctuning-midatasets.image-tiff-nocomp.tar.gz'
+  index: 'task/get-ctuning-dataset/files/20261115.ctuning-midatasets.index.json'
+  converted: '2026-11-16 by task::import-ck'

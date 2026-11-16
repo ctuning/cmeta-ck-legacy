@@ -10,12 +10,18 @@ origin:
   ck_entry: 'program:cbench-automotive-qsort1'
   ck_uid: 'fbebc3b04a78e505'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
 
 # The licence of the sources (the cMeta description and hooks: Apache-2.0)
 license:
   name: 'GPL, version not stated (MiBench)'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output.tmp'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

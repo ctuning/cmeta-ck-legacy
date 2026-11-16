@@ -28,6 +28,7 @@ TEMPLATE = 'template-c-cpu,649899ef3f004e4a'
 TEMPLATE_CK = 'template-ck-program,f7fab3bed78041d1'      # cmeta-aops: the hooks of every converted program
 TASK_SETUP = 'setup,a2f9b61079ce4333'
 TASK_DATASET = 'dataset,30e20c7489f14f84'
+TASK_GET_HF_DATASET = 'get-hf-dataset,9865f4ce243f4984'   # cmeta-aops: a Hugging Face dataset (a folder of it) into the cache
 TASK_SETUP_RUN = 'setup-run,148f6c1fdb4247df'
 LIB_XOPENME = 'lib-xopenme,c7b96678a7734510'
 LIB_POLYBENCH = 'lib-polybench,70349e61a532455d'
@@ -254,8 +255,10 @@ class CTask(InitCTask):
             ck_repo: str = None,        # the name of the CK repository, recorded in each artifact (default: the folder's)
             force: bool = False,        # rewrite artifacts that exist in the receiving repository
             dry_run: bool = False,      # only say what would be made
-            midatasets: str = None,     # entries of the cTuning MiDataSets capsules (patterns): a dataset each,
-                                        # its files from task::get-ctuning-dataset on demand (no CK folder needed)
+            midatasets: str = None,     # sets of inputs of the indexes of task::get-ctuning-dataset (patterns: adpcm,
+                                        # image-*, *): a dataset per set, its inputs as sub-datasets (no CK folder needed)
+            capsules: str = None,       # with --midatasets: where the sets are (a folder, or a URL with {name}), for the
+                                        # inputs kept with the artifacts; else this machine's setting of get-ctuning-dataset
             licenses_md: bool = False,  # write LICENSES.md at the root of "to": the licence of every artifact
     ):
         """
@@ -268,7 +271,7 @@ class CTask(InitCTask):
         report = []
 
         if midatasets:
-            r = self._import_midatasets(midatasets, skip_patterns, to, desc.get('datasets') or {}, force, dry_run)
+            r = self._import_midatasets(midatasets, skip_patterns, to, desc.get('datasets') or {}, force, dry_run, capsules)
             if r['return'] > 0: return r
             report += r['report']
 
@@ -466,8 +469,9 @@ class CTask(InitCTask):
         order = [f for f in (meta.get('dataset_files') or []) if f in data_files]
         order += [f for f in data_files if f not in order]
 
+        text = cfg.get('description') or 'cBench input {name} (cTuning MiDataSets), converted from the CK dataset {name}.'
         lines = ['authors: Grigori Fursin',
-                 f'description: {q("cBench input " + name + " (cTuning MiDataSets), converted from the CK dataset " + name + ".")}',
+                 f'description: {q(text.format(name = name, repo = ck_repo, files = ", ".join(order)))}',
                  '',
                  '# The files of the dataset in CK\'s order: the first is what a program gets by default.',
                  'files:']
@@ -487,7 +491,8 @@ class CTask(InitCTask):
         with open(os.path.join(path, '_desc.yaml'), 'w', encoding = 'utf-8', newline = '\n') as f:
             f.write('\n'.join(lines))
 
-        r = self._edit_cmeta(path, {'desc': f'cBench input {name} (cTuning MiDataSets): {", ".join(order)}.'})
+        text = cfg.get('cmeta_desc') or 'cBench input {name} (cTuning MiDataSets): {files}.'
+        r = self._edit_cmeta(path, {'desc': text.format(name = name, repo = ck_repo, files = ', '.join(order))})
         if r['return'] > 0: return r
         r = self._reindex(category, alias)
         if r['return'] > 0: return r
@@ -495,13 +500,14 @@ class CTask(InitCTask):
         return {'return': 0, 'alias': alias, 'status': status}
 
     ############################################################
-    def _import_midatasets(self, patterns, skip_patterns, to, cfg, force, dry_run):
+    def _import_midatasets(self, patterns, skip_patterns, to, cfg, force, dry_run, capsules):
         """
-        A dataset artifact per entry of the cTuning MiDataSets capsules (the index of task::get-ctuning-dataset):
-        no files of its own - its _desc.yaml asks get-ctuning-dataset for them (uses + result_from_ctx), so the
-        capsule is downloaded the first time one of its inputs is used. An artifact that exists is kept
-        (the small inputs with their files, in this repository or another); --force remakes those of "to"
-        that have no files of their own.
+        A dataset artifact per set of inputs of the indexes of task::get-ctuning-dataset - a kind of cBench input
+        (adpcm: 20 inputs), a set of the office snapshots of the CK paper (image-jpg-fgg-office: day, night) - its
+        inputs as sub-datasets (sub_datasets of its _desc.yaml). The inputs named by local_inputs of the datasets
+        block are kept with the artifact (files/<input>/, copied from the set that get-ctuning-dataset prepares -
+        and checks - once); the others come from that set on demand (uses + result_from_ctx). An artifact that
+        exists is kept; --force remakes those of "to".
         """
         r = self.cm.access({'category': 'task', 'command': 'find', 'arg1': 'get-ctuning-dataset', 'con': False})
         if r['return'] > 0: return r
@@ -515,83 +521,155 @@ class CTask(InitCTask):
         if rr['return'] > 0: return rr
         indexes = []
         for ix in rr['data'].get('indexes') or []:
-            index_path = os.path.join(task_path, ix.get('index') or '')
+            index_file = ix.get('index') or ''
+            index_path = os.path.join(task_path, index_file)
             try:
                 with open(index_path, encoding = 'utf-8') as f:
-                    indexes.append(json.load(f))
+                    indexes.append((json.load(f), index_file, str(ix.get('hub') or '').strip()))
             except (OSError, ValueError) as e:
                 return self.cm.error(f'the index "{index_path}" cannot be read: {e}')
 
         category = self.cmeta['uses_categories']['dataset']
         wanted = [p.strip() for p in patterns.split(',') if p.strip()]
+        local_patterns = [str(p) for p in cfg.get('local_inputs') or []]
+        drop = set(cfg.get('drop_tags') or [])
         report = []
 
-        # Every set of capsules: the MiDataSets (cBench inputs), the office snapshots of the CK paper ...
-        # A set says its tags ("tags" of its index); the MiDataSets have those of the cBench inputs
-        pairs = [(index, kind, rec) for index in indexes for kind, rec in sorted(index['capsules'].items())]
-        for index, kind, rec in pairs:
-            set_tags = index.get('tags') or (list(cfg.get('add_tags') or []) + ['midatasets'])
+        # Every set of every index: the kinds of the MiDataSets (cBench inputs), the sets of the office snapshots
+        # of the CK paper ... An index says the tags of its sets ("tags"); the MiDataSets have those of cBench
+        sets = [(index, index_file, hub, kind, rec) for index, index_file, hub in indexes for kind, rec in sorted(index['capsules'].items())]
+        for index, index_file, hub, kind, rec in sets:
+            if not any(fnmatch.fnmatch(kind, p) for p in wanted) or any(fnmatch.fnmatch(kind, s) for s in skip_patterns):
+                continue
+            set_tags = [str(t) for t in index.get('tags') or []] or (list(cfg.get('add_tags') or []) + ['midatasets'])
             office = 'ck-paper' in set_tags
-            what = 'CK paper input' if office else 'cBench input'
-            source = 'the office webcam snapshots of the CK paper repository' if office else 'cTuning MiDataSets'
-            for entry, x in sorted(rec['entries'].items()):
-                if not any(fnmatch.fnmatch(entry, p) for p in wanted) or any(fnmatch.fnmatch(entry, s) for s in skip_patterns):
-                    continue
-                alias = cfg.get('alias_prefix', 'ctuning-') + entry
+            what = 'CK paper inputs' if office else 'cBench inputs'
+            source = 'the office webcam snapshots of the CK paper' if office else 'cTuning MiDataSets'
+            entries = sorted(rec['entries'].items())
+            alias = cfg.get('alias_prefix', 'ctuning-') + kind
 
-                existing = self._find(category, alias)
-                own_files = [p for p in existing if os.path.isdir(os.path.join(p, 'files'))]
-                if own_files:
-                    report.append(('dataset', entry, alias, f'exists with its files ({own_files[0]})'))
-                    continue
+            # The set's tags: its own, else those all its inputs share; an input's own tags are the rest
+            kind_tags = [str(t) for t in rec.get('tags') or []]
+            if not kind_tags:
+                for e, x in entries:
+                    for t in x.get('tags') or []:
+                        if t not in kind_tags and all(t in (y.get('tags') or []) for _, y in entries):
+                            kind_tags.append(t)
+            tags = list(set_tags) + [t for t in kind_tags if t not in set_tags and t not in drop]
 
-                tags = list(set_tags)
-                for t in x.get('tags') or []:
-                    if t and t not in tags and t not in (cfg.get('drop_tags') or []):
-                        tags.append(t)
+            r = self._prepare_folder(category, alias, to, tags, True, force, dry_run)
+            if r['return'] > 0: return r
+            if r.get('skip'):
+                report.append(('dataset', kind, alias, r['status']))
+                continue
+            path = r['path']
+            status = r['status']
 
-                r = self._prepare_folder(category, alias, to, tags, True, force, dry_run)
-                if r['return'] > 0: return r
-                if r.get('skip'):
-                    report.append(('dataset', entry, alias, r['status']))
-                    continue
-                path = r['path']
-                status = r['status']
+            # The inputs kept with the artifact: from the set get-ctuning-dataset prepares and checks
+            local = [e for e, _ in entries if any(fnmatch.fnmatch(e, p) for p in local_patterns)]
+            files_dir = os.path.join(path, 'files')
+            if os.path.isdir(files_dir):
+                shutil.rmtree(files_dir)
+            if local:
+                p = {'category': 'task', 'command': 'run', 'arg1': 'get-ctuning-dataset', 'capsule': kind, 'con': False, 'quiet': True}
+                if capsules:
+                    p['capsules'] = capsules
+                rr = self.cm.access(p)
+                if rr['return'] > 0: return rr
+                root = rr.get('path_root') or ''
+                if not os.path.isdir(root):
+                    return self.cm.error(f'the set "{kind}" was prepared but its folder is not there ("{root}")')
+                for e in local:
+                    os.makedirs(os.path.join(files_dir, e))
+                    for f in rec['entries'][e]['files']:
+                        shutil.copyfile(os.path.join(root, e, f['name']), os.path.join(files_dir, e, f['name']))
 
+            n = len(entries)
+            kept = ', '.join(local)
+            origin_set = []
+            if hub:
+                # The set's folder of a Hugging Face dataset, by get-hf-dataset (a gated repository: access on request)
+                how = (f'the others from the Hugging Face dataset {hub} (its folder {kind}), downloaded once on demand by '
+                       'task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine)')
+                origin_set.append(f'  hub: {q(hub)}')
+                source_lines = ['# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by',
+                                '# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the',
+                                '# machine): a folder per input. The inputs in files/ of this artifact are taken from there',
+                                'uses:',
+                                f'  - task: {TASK_GET_HF_DATASET}',
+                                f'    repo: {q(hub)}',
+                                f'    filename: {q(kind + "/*")}',
+                                "result_from_ctx: '{{global.get-hf-dataset}}'",
+                                f'sub_datasets_folder: {q(kind)}']
+            else:
+                if rec.get('capsule'):
+                    how = f'the others from the capsule {rec["capsule"]}, downloaded once on demand by task::get-ctuning-dataset'
+                else:
+                    how = 'from the files of their record, downloaded once on demand by task::get-ctuning-dataset'
+                    origin_set.append("  files: 'published one by one (the index names them)'")
+                source_lines = ['# The set the inputs come from, prepared once into the cache by task::get-ctuning-dataset (a capsule unpacked,',
+                                '# or files downloaded one by one): a folder per input. The inputs in files/ of this artifact are taken from there',
+                                'uses:',
+                                f'  - task: get-ctuning-dataset,{task_uid}',
+                                f'    capsule: {q(kind)}',
+                                "result_from_ctx: '{{global.get-ctuning-dataset}}'"]
+            if rec.get('capsule'):
+                origin_set.append(f'  capsule: {q(rec["capsule"])}')
+            if not local:
+                how = how.replace('the others from', 'from')
+            about = f' ({source}' + (f', {rec["desc"]}' if rec.get('desc') else '') + ')'
+            names = ', '.join(e for e, _ in entries) if n <= 4 else f'{entries[0][0]} ... {entries[-1][0]}'
+            text = (f'{what} {kind}{about}: {n} inputs ({names}), ' + (f'{kept} with its files in this repository, ' if local else '') + how + '.')
+
+            lines = ['authors: Grigori Fursin',
+                     f'description: {q(text)}',
+                     ''] + source_lines + [
+                     '',
+                     '# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=' + alias + '/<input>:',
+                     '# the files in the order a program takes them (the first is the main one), the size in bytes, the input\'s own tags,',
+                     '# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry',
+                     'sub_datasets:']
+            ck_repos = []
+            for i, (e, x) in enumerate(entries, 1):
                 files = list(x.get('order') or [f['name'] for f in x['files']])
-                lines = ['authors: Grigori Fursin',
-                         'description: ' + q(f'{what} {entry} ({source}), from the capsule {rec["capsule"]}, '
-                                             'downloaded on demand by task::get-ctuning-dataset.'),
-                         '',
-                         f'# The files come from a capsule of {source}, unpacked once into the cache',
-                         'uses:',
-                         f'  - task: get-ctuning-dataset,{task_uid}',
-                         f'    capsule: {q(kind)}',
-                         f'    entry: {q(entry)}',
-                         "result_from_ctx: '{{global.get-ctuning-dataset}}'",
-                         '',
-                         "# The files of the dataset in CK's order: the first is what a program gets by default.",
-                         'files:']
-                lines += [f'  - {q(f)}' for f in files]
+                own_tags = [t for t in x.get('tags') or [] if t not in kind_tags and t not in drop]
+                size = sum(f.get('size') or 0 for f in x['files'])
+                ck_repo = x.get('ck_repo') or ('ctuning-datasets-min' if 'small' in own_tags else 'ctuning-datasets')
+                if ck_repo not in ck_repos:
+                    ck_repos.append(ck_repo)
+                if x.get('desc'):
+                    text = x['desc']
+                elif 'small' in own_tags or e in local:
+                    text = f'the small input of cBench (CK {ck_repo})'
+                else:
+                    text = f'input {i} of {n} of the cTuning MiDataSets (CK {ck_repo})'
+                lines += [f'  {e}:',
+                          f'    desc: {q(text)}',
+                          '    files: [' + ', '.join(q(f) for f in files) + ']',
+                          f'    size: {size}']
+                if own_tags:
+                    lines.append('    tags: [' + ', '.join(q(t) for t in own_tags) + ']')
                 if x.get('number') is not None:
-                    lines += ['', '# The number a program takes (CK: run_cmd_main.dataset_number), also in number.txt',
-                              f'number: {q(x["number"])}']
-                lines += ['', 'origin:',
-                          f'  ck_repo: {q(x.get("ck_repo") or "ctuning-datasets")}',
-                          f'  ck_entry: {q("dataset:" + entry)}',
-                          f'  ck_uid: {q(x.get("ck_uid") or "")}',
-                          f'  ck_created: {q(x.get("ck_created") or "")}',
-                          f'  capsule: {q(rec["capsule"])}',
-                          f'  converted: {q(datetime.date.today().isoformat() + " by task::import-ck")}',
-                          '']
-                with open(os.path.join(path, '_desc.yaml'), 'w', encoding = 'utf-8', newline = '\n') as f:
-                    f.write('\n'.join(lines))
+                    lines.append(f'    number: {q(x["number"])}')
+                lines.append('    ck: {entry: ' + q(x.get('ck_entry') or 'dataset:' + e) + ', uid: ' + q(x.get('ck_uid') or '') +
+                             ', created: ' + q(x.get('ck_created') or '') + ', repo: ' + q(ck_repo) + '}')
+            lines += ['', 'origin:',
+                      f'  ck_repos: {q(", ".join(ck_repos))}'] + origin_set + [
+                      f'  index: {q("task/get-ctuning-dataset/" + index_file)}',
+                      f'  converted: {q(datetime.date.today().isoformat() + " by task::import-ck")}',
+                      '']
+            with open(os.path.join(path, '_desc.yaml'), 'w', encoding = 'utf-8', newline = '\n') as f:
+                f.write('\n'.join(lines))
 
-                r = self._edit_cmeta(path, {'desc': f'{what} {entry} ({source}, on demand): {", ".join(files)}.'})
-                if r['return'] > 0: return r
-                r = self._reindex(category, alias)
-                if r['return'] > 0: return r
-                report.append(('dataset', entry, alias, status))
+            if local:
+                short = f'{what} {kind}{about}: {n} inputs, {kept} with its files here, the others on demand.'
+            else:
+                short = f'{what} {kind}{about}: {n} inputs, on demand.'
+            r = self._edit_cmeta(path, {'desc': short})
+            if r['return'] > 0: return r
+            r = self._reindex(category, alias)
+            if r['return'] > 0: return r
+            report.append(('dataset', kind, alias, f'{status}: {n} inputs' + (f', {len(local)} with files' if local else '')))
 
         return {'return': 0, 'report': report}
 
@@ -711,18 +789,24 @@ class CTask(InitCTask):
                 suite = (data.get('origin') or {}).get('suite') or ''
                 rows.append((a, suite, lic.get('spdx') or '', lic.get('name') or 'not recorded', lic.get('file') or ''))
 
+        # The datasets: a set of inputs each (sub-datasets), cBench's or the office snapshots of the CK paper
         datasets = os.path.join(root, 'dataset')
-        n_local = n_capsule = n_office = 0
+        n_sets = n_inputs = n_local = n_office = n_office_inputs = 0
         for a in os.listdir(datasets) if os.path.isdir(datasets) else []:
-            if os.path.isdir(os.path.join(datasets, a, 'files')):
-                n_local += 1
-            elif os.path.isfile(os.path.join(datasets, a, '_desc.yaml')):
-                rr = self.cm.utils.files.read_file(os.path.join(datasets, a, '_cmeta.yaml'))
-                tags = ((rr.get('data') or {}).get('tags') or []) if rr['return'] == 0 else []
-                if 'ck-paper' in tags:
-                    n_office += 1
-                else:
-                    n_capsule += 1
+            if not os.path.isfile(os.path.join(datasets, a, '_desc.yaml')):
+                continue
+            rr = self.cm.utils.files.read_file(os.path.join(datasets, a, '_desc.yaml'))
+            subs = ((rr.get('data') or {}).get('sub_datasets') or {}) if rr['return'] == 0 else {}
+            subs = subs if isinstance(subs, dict) else {}
+            rr = self.cm.utils.files.read_file(os.path.join(datasets, a, '_cmeta.yaml'))
+            tags = ((rr.get('data') or {}).get('tags') or []) if rr['return'] == 0 else []
+            if 'ck-paper' in tags:
+                n_office += 1
+                n_office_inputs += len(subs)
+            else:
+                n_sets += 1
+                n_inputs += len(subs)
+                n_local += sum(1 for s in subs if os.path.isdir(os.path.join(datasets, a, 'files', str(s))))
 
         suites = []
         for _, suite, _, _, _ in rows:
@@ -747,14 +831,17 @@ class CTask(InitCTask):
                     L.append(f'| `program/{a}` | {name} | {("`" + spdx + "`") if spdx else "-"} | {("`" + file + "`") if file else "-"} |')
             L.append('')
         L += ['## Datasets', '',
-              f'- {n_local} datasets with their files (`dataset/ctuning-*` with a `files/` folder): the small inputs of',
-              '  cBench (CK `ctuning-datasets-min`); their origins and licences were not recorded in CK.',
-              f'- {n_capsule} datasets fetched on demand (`dataset/ctuning-*` without files): the cTuning MiDataSets',
-              '  (CK `ctuning-datasets`), from the capsules of their Zenodo record, under the licence of that record',
-              '  (see the README of the capsules for their provenance).',
-              f'- {n_office} datasets fetched on demand (`dataset/ctuning-*fgg-office*`): the webcam snapshots of',
-              '  Grigori Fursin\'s office, by day and night, of the CK paper repository (`reproduce-ck-paper`,',
-              '  BSD-3-Clause), from their own capsule.', '',
+              f'- {n_sets} datasets of cBench inputs (`dataset/ctuning-<kind>`, one per kind of input, their {n_inputs} inputs as',
+              f'  sub-datasets): the {n_local} small inputs of cBench (CK `ctuning-datasets-min`) with their files in this',
+              '  repository (`files/<input>/`), the others fetched on demand from the Hugging Face dataset',
+              '  [ctuning/cTuning-MiDataSets](https://huggingface.co/datasets/ctuning/cTuning-MiDataSets) (CK `ctuning-datasets`;',
+              '  access on request, under the terms of use of that dataset: the inputs were collected from public web sources',
+              '  in 2006-2007 and their origins and licences were not recorded).',
+              f'- {n_office} datasets of the office webcam snapshots of the CK paper (`dataset/ctuning-*fgg-office*`, day and',
+              f'  night as sub-datasets, {n_office_inputs} inputs): Grigori Fursin\'s own photographs (CC-BY-4.0), fetched on',
+              '  demand from the files of their Zenodo record [10.5281/zenodo.24275729](https://doi.org/10.5281/zenodo.24275729)',
+              '  (also on the Hub as [ctuning/ck-office-snapshots](https://huggingface.co/datasets/ctuning/ck-office-snapshots));',
+              '  of the CK repositories `reproduce-ck-paper` (BSD-3-Clause) and `ctuning-datasets`.', '',
               '## Binary capsules', '',
               'The MILEPOST GCC capsules that `task/extract-milepost-features-legacy` downloads are in the Zenodo record',
               '10.5281/zenodo.24246695, each with its licences (GPL-3.0-or-later, GPL-2.0-only, LGPL ...; see its README).', '']
@@ -961,6 +1048,11 @@ class CTask(InitCTask):
                         'dataset_file': o.get('dataset_file'),
                         'input_files': o.get('input_files', True) and uses_dataset,
                         'outputs': outputs,
+                        # What CK compared with the reference outputs (run_correctness_output_files: the files the
+                        # program writes and, for every CK program, the standard error it redirected), and whether
+                        # CK said the output does not depend on the kernel's repeat
+                        'check_files': [str(f) for f in (rt.get('run_correctness_output_files') or meta.get('run_correctness_output_files') or [])],
+                        'invariant_of_repeat': rt.get('output_invariant_of_repeat') == 'yes' or meta.get('output_invariant_of_repeat') == 'yes',
                         'hot_functions': [h.get('name') for h in v.get('hot_functions') or [] if h.get('name')]}
         return out
 
@@ -1005,6 +1097,28 @@ class CTask(InitCTask):
                 L.append(f'  spdx: {q(info["spdx"])}')
             if info.get('file'):
                 L.append(f'  file: {q(info["file"])}')
+        # The reference outputs (cx program run ... --check_output): the files CK compared - the same for every
+        # command, else per command below -, what the configuration adds (output_check of _desc.yaml, by program
+        # or by "<program> <command>": files compared too, files not compared and why)
+        checks = self.cdesc.get('output_check') if isinstance(getattr(self, 'cdesc', None), dict) else None
+        checks = checks if isinstance(checks, dict) else {}
+
+        # PolyBench/C: CK's standard error held the arrays the program dumped; the patch moved the dump into its
+        # own file, so that file is what is compared (with the standard error, which must stay empty)
+        if family == 'polybench':
+            for c in commands.values():
+                if 'tmp-output2.tmp' in c['check_files'] and POLYBENCH_DUMP_FILE not in c['check_files']:
+                    c['check_files'] = [POLYBENCH_DUMP_FILE] + c['check_files']
+
+        # A family's rules (output_check_families of _desc.yaml: PolyBench/GPU compares its standard output without
+        # the lines that name the device), under the program's own
+        family_check = (self.cdesc.get('output_check_families') or {}).get(family) if isinstance(getattr(self, 'cdesc', None), dict) else None
+        own = self._merge_checks(family_check, checks.get(name))
+
+        shared = len({tuple(c['check_files']) for c in commands.values()}) == 1 and \
+                 len({bool(c['invariant_of_repeat']) for c in commands.values()}) == 1
+        L += self._output_check_lines(own, 0, files = first['check_files'] if shared else None,
+                                      invariant = first['invariant_of_repeat'] if shared else False)
         cuda = family == 'polybench-cuda'
         opencl = family == 'polybench-opencl'
         L += ['',
@@ -1140,9 +1254,53 @@ class CTask(InitCTask):
                       f'            cmd_main: {q((v["main"] + " {{local.ck_redirects|}}").strip())}']
                 if v['outputs']:
                     L += ['    local_vars:', '      +output_files:'] + [f'        - {q(f)}' for f in v['outputs']]
+                L += self._output_check_lines(checks.get(f'{name} {c}'), 4, files = None if shared else v['check_files'],
+                                              invariant = False if shared else v['invariant_of_repeat'])
                 L.append('')
 
         return '\n'.join(L).rstrip() + '\n'
+
+    def _merge_checks(self, base, own):
+        """Two output_check rules in one: the lists of the second appended to the first's, its why after the first's."""
+        out = {}
+        for block in (base, own):
+            if not isinstance(block, dict):
+                continue
+            for k, v in block.items():
+                if k in ('files', 'skip', 'ignore_lines') and isinstance(v, list):
+                    out[k] = list(out.get(k) or []) + [x for x in v if x not in (out.get(k) or [])]
+                elif k == 'why' and out.get('why'):
+                    out['why'] = f'{out["why"]}; {v}'
+                else:
+                    out[k] = v
+        return out
+
+    def _output_check_lines(self, check, indent, files = None, invariant = False):
+        """
+        The output_check block of a program or of one of its commands: the files compared (CK's
+        run_correctness_output_files, and the configuration's additions), the files not compared with the reason,
+        the lines of the outputs left out of the comparison (the device a GPU program names), and whether the
+        output is the same whatever the kernel's repeat.
+        """
+        check = check if isinstance(check, dict) else {}
+        compared = list(files or []) + [str(f) for f in (check.get('files') or []) if str(f) not in (files or [])]
+        skip = [str(f) for f in (check.get('skip') or [])]
+        ignore = [str(x) for x in (check.get('ignore_lines') or [])]
+        if not compared and not skip and not ignore and not invariant:
+            return []
+        s = ' ' * indent
+        why = str(check.get('why') or '').strip()
+        lines = ['', f'{s}# The reference outputs (cx program run ... --check_output)' + (f': {why}' if why else ''),
+                 f'{s}output_check:']
+        if compared:
+            lines += [f'{s}  files:'] + [f'{s}    - {q(f)}' for f in compared]
+        if skip:
+            lines += [f'{s}  skip:'] + [f'{s}    - {q(f)}' for f in skip]
+        if ignore:
+            lines += [f'{s}  ignore_lines:'] + [f'{s}    - {q(x)}' for x in ignore]
+        if invariant:
+            lines.append(f'{s}  invariant_of_repeat: True')
+        return lines[1:] if indent else lines
 
     ############################################################
     def _program_readme(self, name, family, meta, override, commands, ck_repo, patches):
@@ -1190,17 +1348,25 @@ class CTask(InitCTask):
             for c, v in commands.items():
                 L.append(f'| `{c}` | `{v["dataset_tags"] or "-"}` | `{v["dataset_file"] or "(the first)"}` | `{v["main"]}` |')
             L.append('')
-        if family == 'polybench':
-            L += [f'Sizes: CK\'s by default ({sizes}), with the arrays dumped into `{POLYBENCH_DUMP_FILE}`',
-                  '(the result to compare between targets). `--compile.size=mini|small|standard|large|extralarge`',
-                  'takes the sizes of PolyBench\'s header instead, without the dump unless `--compile.dump=yes`;',
-                  '`--compile.dump=no` leaves the dump out. Each choice is a build of its own.', '',
+        if family in ('polybench', 'polybench-cuda', 'polybench-opencl'):
+            L += [f'Sizes: CK\'s by default ({sizes})' + (f', with the arrays dumped into `{POLYBENCH_DUMP_FILE}`' if family == 'polybench' else '') + ',',
+                  '(the result to compare between targets). `--compile.size=mini|small|standard|large|extralarge`' if family == 'polybench' else
+                  'the result checked against the CPU\'s. `--compile.size=mini|small|standard|large|extralarge`',
+                  'takes the sizes of PolyBench\'s header instead' + (', without the dump unless `--compile.dump=yes`;' if family == 'polybench' else ';'),
+                  '`--compile.n=<N>` makes every dimension N (square arrays)' + ('; `--compile.dump=no` leaves the dump out' if family == 'polybench' else '') + ';',
+                  '`--compile.precision=float|double` sets `DATA_TYPE`; `--compile.d.<NAME>=<value>` any define. Each',
+                  'choice is a build of its own, and part of the key of its reference outputs.', '',
                   '```bash',
-                  f'cx program run {name} cpu --compile.size=large -q',
+                  f'cx program run {name} {"cuda" if family == "polybench-cuda" else ("opencl" if family == "polybench-opencl" else "cpu")} --compile.size=large -q',
+                  f'cx program run {name} {"cuda" if family == "polybench-cuda" else ("opencl" if family == "polybench-opencl" else "cpu")} --compile.n=512 --compile.precision=float -q',
                   '```', '']
-        L += ['`--repeat=<n>` repeats the kernel n times (`CT_REPEAT_MAIN`). Standard output and error go to',
-              '`tmp-output1.tmp` and `tmp-output2.tmp` of the build folder (not on iOS); the times of the',
-              'kernel, from xOpenME, are in the result (`stats-xopenme`, `tmp-ck-timer.json`).', '']
+        L += ['`--repeat=<n>` repeats the kernel n times (`CT_REPEAT_MAIN`); `--calibrate[=<seconds>]` raises the',
+              'repeat until the run lasts about the target (4 s, as CK did; at most `--calibrate_max=10` rounds).',
+              'Standard output and error go to `tmp-output1.tmp` and `tmp-output2.tmp` of the build folder (not on',
+              'iOS); the times of the kernel, from xOpenME, are in the result (`stats-xopenme`, `tmp-ck-timer.json`).',
+              'The summary printed after the run names the parameters and the defines of the build; `--check_output`',
+              'compares the outputs with the reference of the same command, input and parameters (`program.output`),',
+              'or records one.', '']
         if (override.get('local_vars') or {}).get('ck_legacy_c'):
             L += ['The sources were written before C99 (K&R declarations, functions used without a declaration):',
                   'GCC and clang compile them as GNU C89 (`-std=gnu89`), with what GCC 14 and clang 16 made errors',

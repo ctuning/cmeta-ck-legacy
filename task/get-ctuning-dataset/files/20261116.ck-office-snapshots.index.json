@@ -1,0 +1,325 @@
+{
+ "capsules": {
+  "image-jpg-fgg-office": {
+   "capsule": "",
+   "desc": "the snapshots as JPEG",
+   "entries": {
+    "day": {
+     "ck_created": "2016-02-13",
+     "ck_entry": "dataset:image-jpg-fgg-office-day-gray",
+     "ck_repo": "reproduce-ck-paper",
+     "ck_uid": "b20d4d2aa62c0a38",
+     "desc": "Grigori Fursin's office by day: the webcam snapshot as JPEG (1536 x 1536, grayscale)",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-jpg-fgg-office.day.data_orig.jpg",
+       "name": "data_orig.jpg",
+       "sha256": "7ec8aa864f9245ebef529f4e884974576199151b5c4248b5712a9de42956d8f4",
+       "size": 587085
+      }
+     ],
+     "number": null,
+     "order": [
+      "data_orig.jpg"
+     ],
+     "tags": []
+    },
+    "night": {
+     "ck_created": "2016-02-13",
+     "ck_entry": "dataset:image-jpg-fgg-office-night-gray",
+     "ck_repo": "reproduce-ck-paper",
+     "ck_uid": "c9da12c288148ab9",
+     "desc": "Grigori Fursin's office in the late evening: the webcam snapshot as JPEG (1536 x 1536, grayscale)",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-jpg-fgg-office.night.data_orig.jpg",
+       "name": "data_orig.jpg",
+       "sha256": "4d00ebd1492fa2639c90b609e99551d43a104b2a7c8e1294d7f63fdb53ddbb78",
+       "size": 235166
+      }
+     ],
+     "number": null,
+     "order": [
+      "data_orig.jpg"
+     ],
+     "tags": []
+    }
+   },
+   "size": 822251,
+   "tags": [
+    "image",
+    "jpeg",
+    "jpg"
+   ]
+  },
+  "image-ppm-fgg-office": {
+   "capsule": "",
+   "desc": "the snapshots as PPM",
+   "entries": {
+    "day": {
+     "ck_created": "2017-12-11",
+     "ck_entry": "dataset:image-ppm-fgg-office-day-gray",
+     "ck_repo": "reproduce-ck-paper",
+     "ck_uid": "910a4306bdcba206",
+     "desc": "Grigori Fursin's office by day: the webcam snapshot as PPM (1536 x 1536)",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-ppm-fgg-office.day.data_orig.ppm",
+       "name": "data_orig.ppm",
+       "sha256": "10413dcb60bb1193944a12bc87b810d285d61782c1ac00659eca12158f545817",
+       "size": 7077905
+      }
+     ],
+     "number": null,
+     "order": [
+      "data_orig.ppm"
+     ],
+     "tags": []
+    },
+    "night": {
+     "ck_created": "2017-12-11",
+     "ck_entry": "dataset:image-ppm-fgg-office-night-gray",
+     "ck_repo": "reproduce-ck-paper",
+     "ck_uid": "709b60c71ae4c228",
+     "desc": "Grigori Fursin's office in the late evening: the webcam snapshot as PPM (1536 x 1536)",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-ppm-fgg-office.night.data_orig.ppm",
+       "name": "data_orig.ppm",
+       "sha256": "5b1b89b8d54d71c8b6adaefc897fc334260f0546be28b24ce1720489ca34047e",
+       "size": 7077905
+      }
+     ],
+     "number": null,
+     "order": [
+      "data_orig.ppm"
+     ],
+     "tags": []
+    }
+   },
+   "size": 14155810,
+   "tags": [
+    "image",
+    "ppm"
+   ]
+  },
+  "image-raw-bin-fgg-office": {
+   "capsule": "",
+   "desc": "the input of the codelets: 1536 x 1536 pixels as 32-bit integers",
+   "entries": {
+    "day": {
+     "ck_created": "2014-08-11",
+     "ck_entry": "dataset:image-raw-bin-fgg-office-day-gray",
+     "ck_repo": "reproduce-ck-paper",
+     "ck_uid": "c8848a1b1fb1775e",
+     "desc": "Grigori Fursin's office by day: 1536 x 1536 pixels as 32-bit integers (the input of the codelets), with the JPEG it was made from",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-raw-bin-fgg-office.day.data.bin",
+       "name": "data.bin",
+       "sha256": "6d86584f00638f380637550dae23982a45f1a95262be6830ae99dafae29aff79",
+       "size": 9437184
+      },
+      {
+       "file": "dataset.ctuning-image-jpg-fgg-office.day.data_orig.jpg",
+       "name": "data_orig.jpg",
+       "sha256": "7ec8aa864f9245ebef529f4e884974576199151b5c4248b5712a9de42956d8f4",
+       "size": 587085
+      }
+     ],
+     "number": null,
+     "order": [
+      "data.bin",
+      "data_orig.jpg"
+     ],
+     "tags": []
+    },
+    "night": {
+     "ck_created": "2014-08-11",
+     "ck_entry": "dataset:image-raw-bin-fgg-office-night-gray",
+     "ck_repo": "reproduce-ck-paper",
+     "ck_uid": "0045c9b59e84318b",
+     "desc": "Grigori Fursin's office in the late evening: 1536 x 1536 pixels as 32-bit integers (the input of the codelets), with the JPEG it was made from",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-raw-bin-fgg-office.night.data.bin",
+       "name": "data.bin",
+       "sha256": "ef1d77da9da5ddb46b1241d2efbde02ea820d06cec010612482e2910b8475bf5",
+       "size": 9437184
+      },
+      {
+       "file": "dataset.ctuning-image-jpg-fgg-office.night.data_orig.jpg",
+       "name": "data_orig.jpg",
+       "sha256": "4d00ebd1492fa2639c90b609e99551d43a104b2a7c8e1294d7f63fdb53ddbb78",
+       "size": 235166
+      }
+     ],
+     "number": null,
+     "order": [
+      "data.bin",
+      "data_orig.jpg"
+     ],
+     "tags": []
+    }
+   },
+   "size": 19696619,
+   "tags": [
+    "image",
+    "raw-bin",
+    "rgb"
+   ]
+  },
+  "image-raw-fgg-office": {
+   "capsule": "",
+   "desc": "the snapshots as text, one pixel value per line",
+   "entries": {
+    "day": {
+     "ck_created": "2012-04-12",
+     "ck_entry": "dataset:image-raw-fgg-office-day-gray",
+     "ck_repo": "ctuning-datasets",
+     "ck_uid": "",
+     "desc": "Grigori Fursin's office by day: one pixel value per line (text), with the JPEG it was made from",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-raw-fgg-office.day.data.raw",
+       "name": "data.raw",
+       "sha256": "0c551245010585ea1a243e50947423f2b146aa6bdae0fa08092e9c29da0dfc4c",
+       "size": 10384482
+      },
+      {
+       "file": "dataset.ctuning-image-jpg-fgg-office.day.data_orig.jpg",
+       "name": "data_orig.jpg",
+       "sha256": "7ec8aa864f9245ebef529f4e884974576199151b5c4248b5712a9de42956d8f4",
+       "size": 587085
+      }
+     ],
+     "number": null,
+     "order": [
+      "data.raw",
+      "data_orig.jpg"
+     ],
+     "tags": []
+    },
+    "night": {
+     "ck_created": "2012-04-12",
+     "ck_entry": "dataset:image-raw-fgg-office-night-gray",
+     "ck_repo": "ctuning-datasets",
+     "ck_uid": "",
+     "desc": "Grigori Fursin's office in the late evening: one pixel value per line (text), with the JPEG it was made from",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-raw-fgg-office.night.data.raw",
+       "name": "data.raw",
+       "sha256": "566948bd222e3f89a698beada1e4bd86e7e26c00cf0cbaf69be10d8545bd7377",
+       "size": 7569981
+      },
+      {
+       "file": "dataset.ctuning-image-jpg-fgg-office.night.data_orig.jpg",
+       "name": "data_orig.jpg",
+       "sha256": "4d00ebd1492fa2639c90b609e99551d43a104b2a7c8e1294d7f63fdb53ddbb78",
+       "size": 235166
+      }
+     ],
+     "number": null,
+     "order": [
+      "data.raw",
+      "data_orig.jpg"
+     ],
+     "tags": []
+    }
+   },
+   "size": 18776714,
+   "tags": [
+    "image",
+    "raw"
+   ]
+  },
+  "image-raw-fgg-office-small": {
+   "capsule": "",
+   "desc": "smaller versions of the snapshots as text, one pixel value per line",
+   "entries": {
+    "day": {
+     "ck_created": "2012-04-12",
+     "ck_entry": "dataset:image-raw-fgg-office-day-gray-small",
+     "ck_repo": "ctuning-datasets",
+     "ck_uid": "",
+     "desc": "Grigori Fursin's office by day, a smaller version: one pixel value per line (text), the JPEG, and the script that made the text",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-raw-fgg-office-small.day.data.raw",
+       "name": "data.raw",
+       "sha256": "fda5e2bc54b88857ec5755583e0042aabba83460abb6faeefb4f0bbdfe04ed31",
+       "size": 1415525
+      },
+      {
+       "file": "dataset.ctuning-image-raw-fgg-office-small.day.data.jpg",
+       "name": "data.jpg",
+       "sha256": "fd248d158d4003f0d4cfcc01905d2f214c5ea140c368794321e324cd0426a280",
+       "size": 46104
+      },
+      {
+       "file": "dataset.ctuning-image-raw-fgg-office-small.convert_jpg_to_raw.py",
+       "name": "convert_jpg_to_raw.py",
+       "sha256": "03c2591966b079f92aaab403c35631f831cbeebcebd0bc6414dd45ce27177449",
+       "size": 276
+      }
+     ],
+     "number": null,
+     "order": [
+      "data.raw",
+      "data.jpg",
+      "convert_jpg_to_raw.py"
+     ],
+     "tags": []
+    },
+    "night": {
+     "ck_created": "2012-04-12",
+     "ck_entry": "dataset:image-raw-fgg-office-night-gray-small",
+     "ck_repo": "ctuning-datasets",
+     "ck_uid": "",
+     "desc": "Grigori Fursin's office in the late evening, a smaller version: one pixel value per line (text), the JPEG, and the script that made the text",
+     "files": [
+      {
+       "file": "dataset.ctuning-image-raw-fgg-office-small.night.data.raw",
+       "name": "data.raw",
+       "sha256": "5bb146038325405e4ba7c945873e9621f93fd911aa7e0980f39720f5554c149e",
+       "size": 953685
+      },
+      {
+       "file": "dataset.ctuning-image-raw-fgg-office-small.night.data.jpg",
+       "name": "data.jpg",
+       "sha256": "5af2c8076c72979d7c2ce53434b1534b0a385a4a0852bbc9f81fa65f7af2e28d",
+       "size": 11764
+      },
+      {
+       "file": "dataset.ctuning-image-raw-fgg-office-small.convert_jpg_to_raw.py",
+       "name": "convert_jpg_to_raw.py",
+       "sha256": "03c2591966b079f92aaab403c35631f831cbeebcebd0bc6414dd45ce27177449",
+       "size": 276
+      }
+     ],
+     "number": null,
+     "order": [
+      "data.raw",
+      "data.jpg",
+      "convert_jpg_to_raw.py"
+     ],
+     "tags": []
+    }
+   },
+   "size": 2427630,
+   "tags": [
+    "image",
+    "raw",
+    "small"
+   ]
+  }
+ },
+ "made": "2026-11-16",
+ "source": "the dataset entries of the CK repositories reproduce-ck-paper and ctuning-datasets (the CK home of the cTuning server), as converted into cmeta-ck-legacy on 2026-11-16; the files are those of the capsule set of 2026-11-15, published one by one",
+ "tags": [
+  "ctuning",
+  "ck-paper",
+  "office"
+ ]
+}

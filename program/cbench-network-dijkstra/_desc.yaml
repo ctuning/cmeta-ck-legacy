@@ -10,12 +10,18 @@ origin:
   ck_entry: 'program:cbench-network-dijkstra'
   ck_uid: '5e51c0ef845068b3'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
 
 # The licence of the sources (the cMeta description and hooks: Apache-2.0)
 license:
   name: 'GPL, version not stated (MiBench)'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output): the result (the paths and their costs) is on the standard output, which CK did not compare
+output_check:
+  files:
+    - 'tmp-output2.tmp'
+    - 'tmp-output1.tmp'
 
 ###################################################################################################
 local_vars:

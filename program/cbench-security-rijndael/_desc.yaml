@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-security-rijndael'
   ck_uid: '9842d32f842b31e8'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'aesxam.c: the IV and padding generator in 32-bit arithmetic as on the machines it was written for (unsigned long is 64 bits on Linux, macOS and Android, and its 8 bytes were stored into a 4-byte array), and the file length by ftell (fgetpos wrote a whole fpos_t, 16 bytes with glibc, into an unsigned long); the output was different with every compiler'
@@ -20,6 +20,12 @@ origin:
 license:
   name: 'Brian Gladman''s licence (BSD 2-clause style)'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output.tmp'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

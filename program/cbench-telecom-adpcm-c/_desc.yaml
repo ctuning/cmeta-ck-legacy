@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-telecom-adpcm-c'
   ck_uid: 'e091a7488097073a'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'rawcaudio.c: reads and writes the files given on its command line (else the standard streams, as before), in binary mode, with fread/fwrite instead of read(0)/write(1) (no <unistd.h>; an iOS app has no redirection, Windows reads the standard streams in text mode)'
@@ -19,6 +19,12 @@ origin:
 license:
   name: 'Stichting Mathematisch Centrum (CWI) permission notice'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output1.tmp'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

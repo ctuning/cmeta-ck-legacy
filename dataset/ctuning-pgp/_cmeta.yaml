@@ -1,0 +1,17 @@
+artifact: 87842d66b7fb4df8
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-16T06:51:54.694858+00:00'
+desc: 'cBench inputs pgp (cTuning MiDataSets): 20 inputs, pgp-0001 with its files
+  here, the others on demand.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- crypto
+- pgp

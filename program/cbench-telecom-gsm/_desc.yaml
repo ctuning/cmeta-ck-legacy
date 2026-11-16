@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-telecom-gsm'
   ck_uid: 'dd376e64eaf417ca'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'config.h: without unistd.h and utime on Windows (WINDOWS), which has neither (toast.c already leaves fchmod and fchown out there)'
@@ -20,6 +20,11 @@ license:
   name: 'GSM 06.10 licence (Jutta Degener, Carsten Bormann, TU Berlin)'
   spdx: 'TU-Berlin-1.0'
   file: 'src/COPYRIGHT'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

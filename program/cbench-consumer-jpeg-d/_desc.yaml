@@ -10,13 +10,19 @@ origin:
   ck_entry: 'program:cbench-consumer-jpeg-d'
   ck_uid: 'bd14ff49010d959a'
   ck_created: '2012-04-18'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
 
 # The licence of the sources (the cMeta description and hooks: Apache-2.0)
 license:
   name: 'Independent JPEG Group licence'
   spdx: 'IJG'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output.tmp'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

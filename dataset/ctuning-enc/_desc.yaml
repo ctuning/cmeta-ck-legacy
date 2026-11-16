@@ -1,0 +1,125 @@
+authors: Grigori Fursin
+description: 'cBench inputs enc (cTuning MiDataSets): 20 inputs (enc-0001 ... enc-0020), enc-0001 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder enc), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+
+# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
+# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# machine): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-hf-dataset,9865f4ce243f4984
+    repo: 'ctuning/cTuning-MiDataSets'
+    filename: 'enc/*'
+result_from_ctx: '{{global.get-hf-dataset}}'
+sub_datasets_folder: 'enc'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-enc/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  enc-0001:
+    desc: 'the small input of cBench (CK ctuning-datasets-min)'
+    files: ['data.enc']
+    size: 3984
+    tags: ['small']
+    ck: {entry: 'dataset:enc-0001', uid: '7fe8843ad42eab68', created: '2012-04-12', repo: 'ctuning-datasets-min'}
+  enc-0002:
+    desc: 'input 2 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 59008
+    ck: {entry: 'dataset:enc-0002', uid: '10ae4c8cb51b8878', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0003:
+    desc: 'input 3 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 141456
+    ck: {entry: 'dataset:enc-0003', uid: '4e4283baebbac1d8', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0004:
+    desc: 'input 4 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 4445280
+    ck: {entry: 'dataset:enc-0004', uid: 'f417884df8921a89', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0005:
+    desc: 'input 5 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 281488
+    ck: {entry: 'dataset:enc-0005', uid: 'dd4b83e7d8e63fb5', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0006:
+    desc: 'input 6 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 3916384
+    ck: {entry: 'dataset:enc-0006', uid: '1d4cea845e833df5', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0007:
+    desc: 'input 7 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 54672
+    ck: {entry: 'dataset:enc-0007', uid: 'e41e0f044118cb6d', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0008:
+    desc: 'input 8 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 8544
+    ck: {entry: 'dataset:enc-0008', uid: 'e025d479e9ca4f14', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0009:
+    desc: 'input 9 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 141040
+    ck: {entry: 'dataset:enc-0009', uid: 'cd4a75a396f2c02f', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0010:
+    desc: 'input 10 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 39424
+    ck: {entry: 'dataset:enc-0010', uid: '4d866547f99b6afe', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0011:
+    desc: 'input 11 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 99888
+    ck: {entry: 'dataset:enc-0011', uid: '538caf4544975961', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0012:
+    desc: 'input 12 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 38896
+    ck: {entry: 'dataset:enc-0012', uid: 'a6ca2206f4961960', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0013:
+    desc: 'input 13 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 78800
+    ck: {entry: 'dataset:enc-0013', uid: '9d848b843c3ecf62', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0014:
+    desc: 'input 14 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 102288
+    ck: {entry: 'dataset:enc-0014', uid: '2a35621c5359c871', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0015:
+    desc: 'input 15 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 599504
+    ck: {entry: 'dataset:enc-0015', uid: 'e4a8688a5a5c9fa6', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0016:
+    desc: 'input 16 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 536240
+    ck: {entry: 'dataset:enc-0016', uid: '70e10086b4dc5907', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0017:
+    desc: 'input 17 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 59808
+    ck: {entry: 'dataset:enc-0017', uid: '63011cc3ae43e0a5', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0018:
+    desc: 'input 18 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 44944
+    ck: {entry: 'dataset:enc-0018', uid: '56743798b84bd002', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0019:
+    desc: 'input 19 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 99632
+    ck: {entry: 'dataset:enc-0019', uid: 'e0b2688720d0baef', created: '2012-04-12', repo: 'ctuning-datasets'}
+  enc-0020:
+    desc: 'input 20 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.enc']
+    size: 604656
+    ck: {entry: 'dataset:enc-0020', uid: '5b2857258b6f2cce', created: '2012-04-12', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets-min, ctuning-datasets'
+  hub: 'ctuning/cTuning-MiDataSets'
+  capsule: '20261115.ctuning-midatasets.enc.tar.gz'
+  index: 'task/get-ctuning-dataset/files/20261115.ctuning-midatasets.index.json'
+  converted: '2026-11-16 by task::import-ck'

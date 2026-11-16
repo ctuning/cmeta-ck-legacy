@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-security-sha'
   ck_uid: '9b91b2144cd90d33'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'sha.h: the 32-bit words of the digest as unsigned int (unsigned long is 64 bits on Linux, macOS and Android, where the digest was wrong and changed with the compiler), and LITTLE_ENDIAN where the system headers do not define it (Windows): every target is little-endian; the digest is now the SHA-0 of the file on every target (SHA-1 with -DUSE_MODIFIED_SHA)'
@@ -20,6 +20,12 @@ origin:
 license:
   name: 'not stated: the source header names its authors (Uwe Hollerbach, after Peter Gutmann)'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output): the result (the digest) is on the standard output, which CK did not compare
+output_check:
+  files:
+    - 'tmp-output2.tmp'
+    - 'tmp-output1.tmp'
 
 ###################################################################################################
 local_vars:

@@ -110,7 +110,7 @@ class CTask(InitCTask):
 
         for n, (name, path, c, dataset) in enumerate(runs, 1):
             label = name + ('' if c is None else f' --cmd={c}') + ('' if dataset is None else f' --dataset={dataset}')
-            log = os.path.join(logs, name + ('' if c is None else '--' + c) + ('' if dataset is None else '--' + dataset) + '.log')
+            log = os.path.join(logs, name + ('' if c is None else '--' + c) + ('' if dataset is None else '--' + dataset.replace('/', '--')) + '.log')
             json_file = os.path.splitext(log)[0] + '.json'
             for f in (json_file,):
                 if os.path.isfile(f):
@@ -132,12 +132,24 @@ class CTask(InitCTask):
             with open(log, 'w', encoding = 'utf-8', errors = 'replace') as f:
                 f.write(' '.join(shlex.quote(x) for x in cmd) + '\n\n')
                 f.flush()
+                # A run that does not end in time is ended with everything it started (the program itself: a
+                # surviving one would hold the build folder's files and fail every later run of the program)
+                p = subprocess.Popen(cmd, stdin = subprocess.DEVNULL, stdout = f, stderr = subprocess.STDOUT,
+                                     start_new_session = (os.name != 'nt'))
                 try:
-                    p = subprocess.run(cmd, stdin = subprocess.DEVNULL, stdout = f, stderr = subprocess.STDOUT,
-                                       timeout = timeout)
-                    rc = p.returncode
+                    rc = p.wait(timeout = float(timeout))       # a word of the command line is a text
                 except subprocess.TimeoutExpired:
                     rc, status = None, 'timeout'
+                    if os.name == 'nt':
+                        subprocess.run(['taskkill', '/F', '/T', '/PID', str(p.pid)], stdin = subprocess.DEVNULL,
+                                       stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+                    else:
+                        import signal
+                        try:
+                            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+                        except OSError:
+                            p.kill()
+                    p.wait()
             seconds = round(time.monotonic() - started, 3)
 
             result = {}
@@ -157,6 +169,12 @@ class CTask(InitCTask):
             stats = result.get('stats-xopenme') or {}
             if 'execution_time_kernel_0' in stats:
                 entry['kernel_seconds'] = stats['execution_time_kernel_0']
+            # The check against the reference outputs (--extra="--check_output ..."): validated, recorded, failed ...
+            oc = result.get('output_check') if isinstance(result.get('output_check'), dict) else None
+            if oc and oc.get('status'):
+                entry['output_check'] = oc['status']
+                if oc.get('case'):
+                    entry['output_case'] = oc['case']
 
             build = os.path.dirname(((result.get('provenance') or {}).get('path')) or '')
             if build and os.path.isdir(build):
@@ -198,8 +216,14 @@ class CTask(InitCTask):
             for e in bad:
                 x = f' --dataset={e["dataset"]}' if e.get('dataset') else ''
                 print (f'{e["status"].upper():8} {e["program"]} --cmd={e["cmd"]}{x}: {e.get("error", "")[-300:]}')
+            outputs = {}
+            for e in record['runs']:
+                if e.get('output_check'):
+                    outputs[e['output_check']] = outputs.get(e['output_check'], 0) + 1
             print (f'cMeta info: {len(record["runs"]) - len(bad)} of {len(record["runs"])} runs ok on {compute} '
-                   f'({record["host"]})' + (f', {len(checked)} checked' if checks else '') + f'; the record: {out}')
+                   f'({record["host"]})' + (f', {len(checked)} checked' if checks else '') +
+                   (' - reference outputs: ' + ', '.join(f'{n} {s}' for s, n in sorted(outputs.items())) if outputs else '') +
+                   f'; the record: {out}')
 
         if fail and bad:
             return self.cm.error(f'{len(bad)} of {len(record["runs"])} runs failed (see {out})')
@@ -254,13 +278,26 @@ class CTask(InitCTask):
         return tags or find(data.get('updates') or {})
 
     def _datasets(self, tags, patterns):
-        """The aliases of the datasets with these tags (sorted), those that match the patterns when there are some."""
+        """
+        The datasets with these tags (sorted by alias): an alias, or <alias>/<input> for every input of a dataset made
+        of sub-datasets (sub_datasets of its _desc.yaml, in its order); those that match the patterns when there are
+        some (a pattern matches the whole name or the input alone).
+        """
         r = self.cm.access({'category': 'dataset', 'command': 'find', 'tags': tags, 'con': False})
         if r['return'] > 0: return r
-        aliases = sorted({os.path.basename(a['path']) for a in r.get('artifacts', [])})
+        names = []
+        for path in sorted({a['path'] for a in r.get('artifacts', [])}, key = os.path.basename):
+            alias = os.path.basename(path)
+            subs = None
+            if os.path.isfile(os.path.join(path, '_desc.yaml')):
+                rr = self.cm.utils.files.read_file(os.path.join(path, '_desc.yaml'))
+                subs = ((rr.get('data') or {}).get('sub_datasets') or None) if rr['return'] == 0 else None
+            for n in ([f'{alias}/{s}' for s in subs] if isinstance(subs, dict) and subs else [alias]):
+                if n not in names:
+                    names.append(n)
         if patterns:
-            aliases = [a for a in aliases if any(fnmatch.fnmatch(a, p) for p in patterns)]
-        return {'return': 0, 'aliases': aliases}
+            names = [n for n in names if any(fnmatch.fnmatch(n, p) or fnmatch.fnmatch(n.rpartition('/')[2], p) for p in patterns)]
+        return {'return': 0, 'aliases': names}
 
     def _check(self, name, build, checks):
         """

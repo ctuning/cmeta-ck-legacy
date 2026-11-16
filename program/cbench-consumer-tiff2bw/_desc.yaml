@@ -10,13 +10,21 @@ origin:
   ck_entry: 'program:cbench-consumer-tiff2bw'
   ck_uid: '3f1cd294e5ba5241'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
 
 # The licence of the sources (the cMeta description and hooks: Apache-2.0)
 license:
   name: 'libtiff licence (Sam Leffler, SGI)'
   spdx: 'libtiff'
   file: 'src/COPYRIGHT'
+
+# The reference outputs (cx program run ... --check_output): the TIFF written holds the path of the input file (ImageDescription)
+output_check:
+  files:
+    - 'tmp-output.tmp'
+    - 'tmp-output2.tmp'
+  skip:
+    - 'tmp-output.tmp'
 
 ###################################################################################################
 local_vars:

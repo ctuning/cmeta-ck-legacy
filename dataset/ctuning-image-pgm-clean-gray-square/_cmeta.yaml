@@ -1,0 +1,17 @@
+artifact: 5337dccecf3646c5
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-16T06:51:50.959651+00:00'
+desc: 'cBench inputs image-pgm-clean-gray-square (cTuning MiDataSets): 8 inputs, image-pgm-clean-gray-square-600-450-8
+  with its files here, the others on demand.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- cbench
+- midatasets
+- image
+- pgm

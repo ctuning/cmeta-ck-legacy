@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-network-patricia'
   ck_uid: 'dbf6c794119a7357'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'patricia_test.c: the node data is cleared with sizeof(struct MyNode); sizeof(*pm_data) of a void pointer is an error for MSVC and 1 byte for GCC (the rest of the node was left as malloc gave it)'
@@ -19,6 +19,12 @@ origin:
 license:
   name: 'GPL, version not stated (MiBench)'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output): the result (what was found at each time) is on the standard output, which CK did not compare
+output_check:
+  files:
+    - 'tmp-output2.tmp'
+    - 'tmp-output1.tmp'
 
 ###################################################################################################
 local_vars:

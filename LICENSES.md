@@ -124,14 +124,17 @@ in the file named, in the program's folder.
 
 ## Datasets
 
-- 21 datasets with their files (`dataset/ctuning-*` with a `files/` folder): the small inputs of
-  cBench (CK `ctuning-datasets-min`); their origins and licences were not recorded in CK.
-- 468 datasets fetched on demand (`dataset/ctuning-*` without files): the cTuning MiDataSets
-  (CK `ctuning-datasets`), from the capsules of their Zenodo record, under the licence of that record
-  (see the README of the capsules for their provenance).
-- 10 datasets fetched on demand (`dataset/ctuning-*fgg-office*`): the webcam snapshots of
-  Grigori Fursin's office, by day and night, of the CK paper repository (`reproduce-ck-paper`,
-  BSD-3-Clause), from their own capsule.
+- 23 datasets of cBench inputs (`dataset/ctuning-<kind>`, one per kind of input, their 491 inputs as
+  sub-datasets): the 23 small inputs of cBench (CK `ctuning-datasets-min`) with their files in this
+  repository (`files/<input>/`), the others fetched on demand from the Hugging Face dataset
+  [ctuning/cTuning-MiDataSets](https://huggingface.co/datasets/ctuning/cTuning-MiDataSets) (CK `ctuning-datasets`;
+  access on request, under the terms of use of that dataset: the inputs were collected from public web sources
+  in 2006-2007 and their origins and licences were not recorded).
+- 5 datasets of the office webcam snapshots of the CK paper (`dataset/ctuning-*fgg-office*`, day and
+  night as sub-datasets, 10 inputs): Grigori Fursin's own photographs (CC-BY-4.0), fetched on
+  demand from the files of their Zenodo record [10.5281/zenodo.24275729](https://doi.org/10.5281/zenodo.24275729)
+  (also on the Hub as [ctuning/ck-office-snapshots](https://huggingface.co/datasets/ctuning/ck-office-snapshots));
+  of the CK repositories `reproduce-ck-paper` (BSD-3-Clause) and `ctuning-datasets`.
 
 ## Binary capsules
 

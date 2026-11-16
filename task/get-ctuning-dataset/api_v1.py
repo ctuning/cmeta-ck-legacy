@@ -2,25 +2,32 @@
 Licensed under the Apache License, Version 2.0.
 See the LICENSE file in the project root for details.
 
-The full cBench inputs (cTuning MiDataSets) on demand. They are in capsules, one per kind of input
-(20261115.ctuning-midatasets.image-ppm.tar.gz holds the 20 PPM images ...). run() puts one capsule into
-the cache entry of this task (one entry per capsule: cache_params): copied from a folder or downloaded,
-its SHA-256 compared with the index, unpacked, every file checked. finish_dynamic_result() then gives
-the files of the entry asked for, also when the capsule comes from the cache:
+The full cBench inputs (cTuning MiDataSets) and the office snapshots of the CK paper on demand. A set of inputs is
+either a capsule - one archive per kind of input (20261115.ctuning-midatasets.image-ppm.tar.gz holds the 20 PPM
+images) - or files published one by one (the office snapshots: dataset.ctuning-image-jpg-fgg-office.day.data_orig.jpg
+...); an index (indexes of _desc.yaml) lists the sets, their inputs and the SHA-256 of everything. run() puts one set
+into the cache entry of this task (one entry per set: cache_params): copied from a folder or downloaded, checked, a
+capsule unpacked - a folder per input, <input>/<files>, the layout of a dataset's files/ with sub-datasets.
 
-  path        the entry's first file (CK's order: the file a program takes by default)
-  path_entry  the entry's folder
-  files       the entry's files in CK's order (a program that takes several reads them from here)
+A dataset artifact asks for it in its _desc.yaml (uses + result_from_ctx) and takes its sub-datasets from path_root
+of the result:
 
-A dataset artifact asks for it in its _desc.yaml (uses + result_from_ctx):
-
+  sub_datasets:
+    image-ppm-0001: {files: [data.ppm]}
+    ...
   uses:
     - task: get-ctuning-dataset,e4bfa3539ac64d5f
       capsule: image-ppm
-      entry: image-ppm-0007
   result_from_ctx: '{{global.get-ctuning-dataset}}'
 
-  cx task run get-ctuning-dataset image-ppm image-ppm-0007 --capsules=<folder or URL with {name}>
+  cx task run get-ctuning-dataset image-ppm --capsules=<folder, or URL with {name}>
+  cx task run get-ctuning-dataset image-ppm image-ppm-0007     # one input: its files in the result (path, files ...)
+
+finish_dynamic_result() gives the files of the input asked for (also when the set comes from the cache):
+
+  path        the input's first file (CK's order: the file a program takes by default)
+  path_entry  the input's folder
+  files       the input's files in CK's order (a program that takes several reads them from here)
 """
 
 import hashlib
@@ -52,13 +59,14 @@ class CTask(InitCTask):
     ############################################################
     def run(self,
             ctx: dict,
-            capsule: str = None,        # the kind of input: image-ppm, audio-wav, txt, number ...
-            entry: str = None,          # the entry of the capsule (image-ppm-0007); its files come with the result
-            capsules: str = None,       # where the capsules are: a folder, or a URL with {name}
-            check: bool = True,         # compare every unpacked file with the SHA-256 of the index
+            capsule: str = None,        # the set of inputs: a kind of cBench input (image-ppm, audio-wav, txt, number ...),
+                                        # a set of the office snapshots (image-jpg-fgg-office)
+            entry: str = None,          # one input of the set (image-ppm-0007): its files come with the result
+            capsules: str = None,       # where the capsules or files are: a folder, or a URL with {name}
+            check: bool = True,         # compare every file with the SHA-256 of the index
     ):
         """
-        Put a capsule of the cTuning MiDataSets into this cache entry (the working folder) and unpack it.
+        Put a set of inputs into this cache entry (the working folder): a capsule unpacked, or its files one by one.
         """
 
         con = ctx['control'].get('con', False)
@@ -68,51 +76,45 @@ class CTask(InitCTask):
         rec = r['record']
 
         # The places to try, in order: those given (--capsules, else this machine's setting - several
-        # separated by ";"), then the place where the capsule's set is published
+        # separated by ";"), then the place where the set is published
         given = capsules or self._configured()
         places = [x.strip() for x in str(given or '').split(';') if x.strip()]
         for x in (r.get('url'), self._desc().get('capsules')):
             if x and x not in places:
                 places.append(x)
         if not places:
-            return self.cm.error(f'no place for the capsule "{capsule}" yet: give --capsules=<folder, or a URL '
+            return self.cm.error(f'no place for the set "{capsule}" yet: give --capsules=<folder, or a URL '
                                  f'with {{name}}> or set it for this machine (cx config set {CONFIG} --meta.capsules=...)')
 
         work = os.getcwd()
-        name = rec['capsule']
-        target = os.path.join(work, name)
+        result = {'return': 0, 'path_root': work, 'capsule': capsule, 'entries': sorted(rec['entries'])}
 
-        errors = []
-        for source in places:
-            if source.startswith(('http://', 'https://')):
-                url = source.replace('{name}', name) if '{name}' in source else source.rstrip('/') + '/' + name
-                if con:
-                    print (f'cMeta info: downloading {name} ({rec["size"] / 1e6:.1f} MB) from {url}')
-                rr = self.cm.utils.net.download(url, filename = name + '.download', path = work, show_progress = con)
-                if rr['return'] > 0:
-                    errors.append(f'{url}: {rr.get("error")}')
-                    continue
-                os.replace(os.path.join(work, name + '.download'), target)
-                break
-            src = os.path.join(os.path.expanduser(source), name)
-            if not os.path.isfile(src):
-                errors.append(f'not in "{source}"')
-                continue
-            if con:
-                print (f'cMeta info: copying {name} ({rec["size"] / 1e6:.1f} MB) from {source}')
-            shutil.copyfile(src, target)
-            break
-        else:
-            return self.cm.error(f'capsule "{name}" not found: ' + '; '.join(errors))
+        if rec.get('capsule'):
+            # A capsule: the archive, checked and unpacked
+            name = rec['capsule']
+            target = os.path.join(work, name)
+            r = self._fetch(places, name, target, rec.get('size'), con)
+            if r['return'] > 0: return r
 
-        digest = sha256_of(target)
-        if digest != rec['sha256']:
+            digest = sha256_of(target)
+            if digest != rec['sha256']:
+                os.remove(target)
+                return self.cm.error(f'capsule "{name}" has the SHA-256 {digest}, not {rec["sha256"]} of the index')
+
+            r = self._unpack(target, work)
+            if r['return'] > 0: return r
             os.remove(target)
-            return self.cm.error(f'capsule "{name}" has the SHA-256 {digest}, not {rec["sha256"]} of the index')
+            result.update({'capsule_file': name, 'capsule_sha256': digest})
 
-        r = self._unpack(target, work)
-        if r['return'] > 0: return r
-        os.remove(target)
+        else:
+            # Files published one by one ("file" of each file of the index: its published name): every input of
+            # the set, into <input>/<name>
+            for e, x in sorted(rec['entries'].items()):
+                os.makedirs(os.path.join(work, e), exist_ok = True)
+                for f in x['files']:
+                    r = self._fetch(places, f.get('file') or f['name'], os.path.join(work, e, f['name']), f.get('size'), con)
+                    if r['return'] > 0: return r
+            result['capsule_file'] = ''
 
         if check:
             bad = []
@@ -122,13 +124,12 @@ class CTask(InitCTask):
                     if not os.path.isfile(p) or sha256_of(p) != f['sha256']:
                         bad.append(f'{e}/{f["name"]}')
             if bad:
-                return self.cm.error(f'capsule "{name}": {len(bad)} files differ from the index: {", ".join(bad[:5])}')
+                return self.cm.error(f'set "{capsule}": {len(bad)} files differ from the index: {", ".join(bad[:5])}')
 
         if con:
-            print (f'cMeta info: {len(rec["entries"])} entries of "{capsule}" in {work}')
+            print (f'cMeta info: {len(rec["entries"])} inputs of "{capsule}" in {work}')
 
-        return {'return': 0, 'path_root': work, 'capsule': capsule, 'capsule_file': name, 'capsule_sha256': digest,
-                'entries': sorted(rec['entries'])}
+        return result
 
     ############################################################
     def finish_dynamic_result(self,
@@ -136,7 +137,7 @@ class CTask(InitCTask):
                               result: dict = {},
                               params: dict = {},
     ):
-        """The files of the entry asked for (params.entry), from the capsule's folder (also from the cache)."""
+        """The files of the input asked for (params.entry), from the set's folder (also from the cache)."""
 
         entry = params.get('entry')
         root = result.get('path_root')
@@ -160,11 +161,39 @@ class CTask(InitCTask):
         return {'return': 0, 'result': result}
 
     ############################################################
+    def _fetch(self, places, name, target, size, con):
+        """A published file (name) into target, from the first place that has it: a URL downloaded, a folder copied."""
+
+        mb = f' ({size / 1e6:.1f} MB)' if isinstance(size, (int, float)) else ''
+        work = os.path.dirname(target)
+        errors = []
+        for source in places:
+            if source.startswith(('http://', 'https://')):
+                url = source.replace('{name}', name) if '{name}' in source else source.rstrip('/') + '/' + name
+                if con:
+                    print (f'cMeta info: downloading {name}{mb} from {url}')
+                rr = self.cm.utils.net.download(url, filename = os.path.basename(target) + '.download', path = work, show_progress = con)
+                if rr['return'] > 0:
+                    errors.append(f'{url}: {rr.get("error")}')
+                    continue
+                os.replace(target + '.download', target)
+                return {'return': 0}
+            src = os.path.join(os.path.expanduser(source), name)
+            if not os.path.isfile(src):
+                errors.append(f'not in "{source}"')
+                continue
+            if con:
+                print (f'cMeta info: copying {name}{mb} from {source}')
+            shutil.copyfile(src, target)
+            return {'return': 0}
+        return self.cm.error(f'"{name}" not found: ' + '; '.join(errors))
+
+    ############################################################
     def _desc(self):
         return self.cdesc if isinstance(getattr(self, 'cdesc', None), dict) else {}
 
     def _indexes(self):
-        """[(index, url of its set)] of the sets of capsules ("indexes" of _desc.yaml)."""
+        """[(index, url of its set)] of the sets of inputs ("indexes" of _desc.yaml)."""
         out = []
         for x in self._desc().get('indexes') or []:
             path = os.path.join(self.artifact_path, x.get('index') or '')
@@ -172,27 +201,27 @@ class CTask(InitCTask):
                 with open(path, encoding = 'utf-8') as f:
                     out.append((json.load(f), str(x.get('url') or '').strip()))
             except (OSError, ValueError) as e:
-                return self.cm.error(f'the index of the capsules "{path}" cannot be read: {e}')
+                return self.cm.error(f'the index "{path}" cannot be read: {e}')
         return {'return': 0, 'indexes': out}
 
     def _capsule_record(self, capsule, entry):
-        """The record of a capsule in the indexes, the place of its set (and a check that the entry is one of its)."""
+        """The record of a set in the indexes, the place where it is published (and a check that the entry is one of its)."""
         r = self._indexes()
         if r['return'] > 0: return r
         names = sorted(c for index, _ in r['indexes'] for c in index['capsules'])
         if not capsule:
-            return self.cm.error('--capsule=<kind> is needed: ' + ', '.join(names))
+            return self.cm.error('--capsule=<set> is needed: ' + ', '.join(names))
         for index, url in r['indexes']:
             rec = index['capsules'].get(capsule)
             if rec is None:
                 continue
             if entry and entry not in rec['entries']:
-                return self.cm.error(f'no entry "{entry}" in the capsule "{capsule}"; there are: ' + ', '.join(sorted(rec['entries'])))
+                return self.cm.error(f'no input "{entry}" in the set "{capsule}"; there are: ' + ', '.join(sorted(rec['entries'])))
             return {'return': 0, 'record': rec, 'url': url, 'tags': index.get('tags') or []}
-        return self.cm.error(f'no capsule "{capsule}"; there are: ' + ', '.join(names))
+        return self.cm.error(f'no set "{capsule}"; there are: ' + ', '.join(names))
 
     def _configured(self):
-        """This machine's place of the capsules (config task-get-ctuning-dataset, key capsules)."""
+        """This machine's place of the capsules and files (config task-get-ctuning-dataset, key capsules)."""
         r = self.cm.access({'category': 'config', 'command': 'read', 'arg1': CONFIG, 'con': False})
         if r.get('return', 1) > 0:
             return ''

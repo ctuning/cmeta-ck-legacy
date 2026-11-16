@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-consumer-lame'
   ck_uid: '5ae87ab32641f495'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'quantize-pvt.c: the MSVC inline assembly (x87) only for 32-bit x86 (_M_IX86); 64-bit MSVC has no inline assembler and takes the C code, as every other compiler does'
@@ -21,6 +21,14 @@ license:
   name: 'LAME 3.70: GNU Library GPL v2 or later (lame.c ...), and GNU GPL v2 or later for quantize.c and vbrquantize.c'
   spdx: 'LGPL-2.0-or-later AND GPL-2.0-or-later'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output): LAME prints the path of the input and its progress with times on the standard error
+output_check:
+  files:
+    - 'tmp-output.tmp'
+    - 'tmp-output2.tmp'
+  skip:
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

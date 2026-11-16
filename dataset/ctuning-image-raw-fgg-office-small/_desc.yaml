@@ -1,0 +1,30 @@
+authors: Grigori Fursin
+description: 'CK paper inputs image-raw-fgg-office-small (the office webcam snapshots of the CK paper, smaller versions of the snapshots as text, one pixel value per line): 2 inputs (day, night), from the files of their record, downloaded once on demand by task::get-ctuning-dataset.'
+
+# The set the inputs come from, prepared once into the cache by task::get-ctuning-dataset (a capsule unpacked,
+# or files downloaded one by one): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-ctuning-dataset,e4bfa3539ac64d5f
+    capsule: 'image-raw-fgg-office-small'
+result_from_ctx: '{{global.get-ctuning-dataset}}'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-image-raw-fgg-office-small/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  day:
+    desc: 'Grigori Fursin''s office by day, a smaller version: one pixel value per line (text), the JPEG, and the script that made the text'
+    files: ['data.raw', 'data.jpg', 'convert_jpg_to_raw.py']
+    size: 1461905
+    ck: {entry: 'dataset:image-raw-fgg-office-day-gray-small', uid: '', created: '2012-04-12', repo: 'ctuning-datasets'}
+  night:
+    desc: 'Grigori Fursin''s office in the late evening, a smaller version: one pixel value per line (text), the JPEG, and the script that made the text'
+    files: ['data.raw', 'data.jpg', 'convert_jpg_to_raw.py']
+    size: 965725
+    ck: {entry: 'dataset:image-raw-fgg-office-night-gray-small', uid: '', created: '2012-04-12', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets'
+  files: 'published one by one (the index names them)'
+  index: 'task/get-ctuning-dataset/files/20261116.ck-office-snapshots.index.json'
+  converted: '2026-11-16 by task::import-ck'

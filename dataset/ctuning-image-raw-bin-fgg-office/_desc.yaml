@@ -1,0 +1,30 @@
+authors: Grigori Fursin
+description: 'CK paper inputs image-raw-bin-fgg-office (the office webcam snapshots of the CK paper, the input of the codelets: 1536 x 1536 pixels as 32-bit integers): 2 inputs (day, night), from the files of their record, downloaded once on demand by task::get-ctuning-dataset.'
+
+# The set the inputs come from, prepared once into the cache by task::get-ctuning-dataset (a capsule unpacked,
+# or files downloaded one by one): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-ctuning-dataset,e4bfa3539ac64d5f
+    capsule: 'image-raw-bin-fgg-office'
+result_from_ctx: '{{global.get-ctuning-dataset}}'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-image-raw-bin-fgg-office/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  day:
+    desc: 'Grigori Fursin''s office by day: 1536 x 1536 pixels as 32-bit integers (the input of the codelets), with the JPEG it was made from'
+    files: ['data.bin', 'data_orig.jpg']
+    size: 10024269
+    ck: {entry: 'dataset:image-raw-bin-fgg-office-day-gray', uid: 'c8848a1b1fb1775e', created: '2014-08-11', repo: 'reproduce-ck-paper'}
+  night:
+    desc: 'Grigori Fursin''s office in the late evening: 1536 x 1536 pixels as 32-bit integers (the input of the codelets), with the JPEG it was made from'
+    files: ['data.bin', 'data_orig.jpg']
+    size: 9672350
+    ck: {entry: 'dataset:image-raw-bin-fgg-office-night-gray', uid: '0045c9b59e84318b', created: '2014-08-11', repo: 'reproduce-ck-paper'}
+
+origin:
+  ck_repos: 'reproduce-ck-paper'
+  files: 'published one by one (the index names them)'
+  index: 'task/get-ctuning-dataset/files/20261116.ck-office-snapshots.index.json'
+  converted: '2026-11-16 by task::import-ck'

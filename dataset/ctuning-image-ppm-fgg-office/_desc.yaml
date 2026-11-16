@@ -1,0 +1,30 @@
+authors: Grigori Fursin
+description: 'CK paper inputs image-ppm-fgg-office (the office webcam snapshots of the CK paper, the snapshots as PPM): 2 inputs (day, night), from the files of their record, downloaded once on demand by task::get-ctuning-dataset.'
+
+# The set the inputs come from, prepared once into the cache by task::get-ctuning-dataset (a capsule unpacked,
+# or files downloaded one by one): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-ctuning-dataset,e4bfa3539ac64d5f
+    capsule: 'image-ppm-fgg-office'
+result_from_ctx: '{{global.get-ctuning-dataset}}'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-image-ppm-fgg-office/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  day:
+    desc: 'Grigori Fursin''s office by day: the webcam snapshot as PPM (1536 x 1536)'
+    files: ['data_orig.ppm']
+    size: 7077905
+    ck: {entry: 'dataset:image-ppm-fgg-office-day-gray', uid: '910a4306bdcba206', created: '2017-12-11', repo: 'reproduce-ck-paper'}
+  night:
+    desc: 'Grigori Fursin''s office in the late evening: the webcam snapshot as PPM (1536 x 1536)'
+    files: ['data_orig.ppm']
+    size: 7077905
+    ck: {entry: 'dataset:image-ppm-fgg-office-night-gray', uid: '709b60c71ae4c228', created: '2017-12-11', repo: 'reproduce-ck-paper'}
+
+origin:
+  ck_repos: 'reproduce-ck-paper'
+  files: 'published one by one (the index names them)'
+  index: 'task/get-ctuning-dataset/files/20261116.ck-office-snapshots.index.json'
+  converted: '2026-11-16 by task::import-ck'

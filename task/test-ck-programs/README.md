@@ -14,7 +14,16 @@ cx task run test-ck-programs --compare=windows-msvc.json,windows-clang.json,andr
 
 Each run is `cx program run <program> --compute=<target> [--cmd=<command>] [--dataset=<alias>] -q` in a
 process of its own, with standard input closed and a time limit (`--timeout`, 900 s); its output goes
-to `<out>-logs/`. `--compile_only` only builds (`cx program compile`).
+to `<out>-logs/`. `--compile_only` only builds (`cx program compile`). `--extra` passes any words to
+every run: the reference outputs (`--extra=--check_output` records what has no reference yet into
+`--output_repo`, `--extra=--check_output=validate` checks every run against its reference - the record keeps
+each run's `output_check` and the final line counts them), the parameters of the runs (`--extra="--repeat=10"`,
+`--extra="--calibrate=4"`, `--extra="--compile.n=512 --compile.precision=float"`):
+
+```bash
+cx task run test-ck-programs --compute=cpu "--extra=--check_output --output_repo=cmeta-repo-ck-legacy-program-output" --out=record.json -q
+cx task run test-ck-programs --compute=cpu "--extra=--check_output=validate" --out=validate.json -q
+```
 
 The comparison says, per program and command, whether the outputs are the same everywhere; it reads
 Windows' line ends (`\r\n`) as `\n` and every spelling of NaN (`-nan(ind)`, `-nan`, `nan`) as one, and

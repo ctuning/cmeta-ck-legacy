@@ -1,0 +1,19 @@
+artifact: d77c307faa364a8b
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-16T06:51:55.426861+00:00'
+desc: 'CK paper inputs image-raw-bin-fgg-office (the office webcam snapshots of the
+  CK paper, the input of the codelets: 1536 x 1536 pixels as 32-bit integers): 2 inputs,
+  on demand.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- ck-paper
+- office
+- image
+- raw-bin
+- rgb

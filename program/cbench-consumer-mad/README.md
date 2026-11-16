@@ -19,9 +19,13 @@ The input is a `dataset` artifact selected by tags (with `-q`, the first; withou
 |---|---|---|---|
 | `default` | `audio,mp3` | `(the first)` | `--time=10000 --output=wave:tmp-output.tmp {qinput_files.data}` |
 
-`--repeat=<n>` repeats the kernel n times (`CT_REPEAT_MAIN`). Standard output and error go to
-`tmp-output1.tmp` and `tmp-output2.tmp` of the build folder (not on iOS); the times of the
-kernel, from xOpenME, are in the result (`stats-xopenme`, `tmp-ck-timer.json`).
+`--repeat=<n>` repeats the kernel n times (`CT_REPEAT_MAIN`); `--calibrate[=<seconds>]` raises the
+repeat until the run lasts about the target (4 s, as CK did; at most `--calibrate_max=10` rounds).
+Standard output and error go to `tmp-output1.tmp` and `tmp-output2.tmp` of the build folder (not on
+iOS); the times of the kernel, from xOpenME, are in the result (`stats-xopenme`, `tmp-ck-timer.json`).
+The summary printed after the run names the parameters and the defines of the build; `--check_output`
+compares the outputs with the reference of the same command, input and parameters (`program.output`),
+or records one.
 
 The sources were written before C99 (K&R declarations, functions used without a declaration):
 GCC and clang compile them as GNU C89 (`-std=gnu89`), with what GCC 14 and clang 16 made errors

@@ -199,3 +199,47 @@ datasets:
   add_tags:
     - ctuning
     - cbench
+  # --midatasets: the inputs of a set kept with its dataset artifact (files/<input>/, in this repository) - the
+  # small inputs that cBench takes by default (CK ctuning-datasets-min); the others come from the set on demand
+  local_inputs:
+    - '*-0001'
+    - '*-0001-bw'
+    - '*-0001-nocomp'
+    - 'image-pgm-clean-gray-square-600-450-8'
+
+# The outputs of a program (or of one of its commands: "<program> <command>") that are not compared with the reference
+# outputs (cx program run ... --check_output), with the reason: they hold something of the machine or of the moment.
+# import-ck writes them into the program's _desc.yaml (output_check: skip).
+# The rules of a whole family of programs, under each program's own (output_check below)
+output_check_families:
+  polybench-cuda:
+    files: [tmp-output1.tmp]
+    ignore_lines: ['^GPU Device ']
+    why: the standard output says whether the GPU's result matches the CPU's (the device it names is left out)
+  polybench-opencl:
+    files: [tmp-output1.tmp]
+    ignore_lines: ['^number of platforms is ', '^platform name is ', '^platform version is ', '^number of devices is ', '^device name is ']
+    why: the standard output says whether the GPU's result matches the CPU's (the platform and device it names are left out)
+
+output_check:
+  cbench-network-dijkstra:
+    files: [tmp-output1.tmp]
+    why: the result (the paths and their costs) is on the standard output, which CK did not compare
+  cbench-network-patricia:
+    files: [tmp-output1.tmp]
+    why: the result (what was found at each time) is on the standard output, which CK did not compare
+  cbench-security-sha:
+    files: [tmp-output1.tmp]
+    why: the result (the digest) is on the standard output, which CK did not compare
+  cbench-consumer-lame:
+    skip: [tmp-output2.tmp]
+    why: LAME prints the path of the input and its progress with times on the standard error
+  cbench-consumer-tiff2bw:
+    skip: [tmp-output.tmp]
+    why: the TIFF written holds the path of the input file (ImageDescription)
+  cbench-consumer-tiff2median:
+    skip: [tmp-output.tmp]
+    why: the TIFF written holds the path of the input file (ImageDescription)
+  cbench-security-pgp encode:
+    skip: [tmp-output.tmp]
+    why: the signature holds the time it was made

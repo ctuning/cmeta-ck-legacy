@@ -1,0 +1,17 @@
+artifact: 46185ce2f14f4ed5
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-16T06:51:55.325785+00:00'
+desc: 'CK paper inputs image-ppm-fgg-office (the office webcam snapshots of the CK
+  paper, the snapshots as PPM): 2 inputs, on demand.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- ck-paper
+- office
+- image
+- ppm

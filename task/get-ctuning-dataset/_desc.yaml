@@ -1,8 +1,8 @@
 authors: Grigori Fursin
-description: The full cBench inputs (cTuning MiDataSets) on demand - a capsule per kind, downloaded once into the cache, checked, unpacked.
+description: The full cBench inputs (cTuning MiDataSets) and the office snapshots of the CK paper on demand - a set of inputs (a capsule per kind of cBench input, the files of an office set) downloaded once into the cache, checked, unpacked.
 
-# One cache entry per capsule; the entry asked for is chosen after (finish_dynamic_result), so the
-# 20 inputs of a kind share one download
+# One cache entry per set; an input asked for is chosen after (finish_dynamic_result), so the 20 inputs of a
+# kind share one download - and a dataset made of them (sub_datasets) takes any of them from path_root
 store_global: True
 storage_key: get-ctuning-dataset
 cache: True
@@ -13,25 +13,33 @@ params_map:
   arg2: capsule
   arg3: entry
 
-# Where the capsules are: a folder, or a URL with {name} for a capsule's file name. --capsules on the
-# command line, else the config artifact task-get-ctuning-dataset (key capsules), else the place of the
-# capsule's set below (its Zenodo record, once published), else this default (none until then).
+# Where the capsules and the published files are: a folder, or a URL with {name} for the file name of a
+# capsule or a published file. --capsules on the command line, else the config artifact
+# task-get-ctuning-dataset (key capsules; several separated by ";"), else the place of the set below (its
+# Zenodo record, once published), else this default (none until then).
 capsules: ''
 
-# The sets of capsules: each index lists its capsules, their entries and the SHA-256 of every file
-# (made with them); "url" is where the set is published (a URL with {name}), empty until it is.
+# The sets of inputs: each index lists its sets ("capsules"), their inputs ("entries") and the SHA-256 of
+# every file; a set is a capsule (an archive) or files published one by one ("file" of each file: its
+# published name). "url" is where the set is published (a URL with {name}), empty until it is; "hub" is the
+# Hugging Face dataset that holds the sets as folders (<set>/<input>/<files>) - import-ck then makes the
+# datasets of that index fetch from it with get-hf-dataset (access on request, hf auth login once), and this
+# task serves the capsules from a folder or a URL as the other way.
 indexes:
   - index: files/20261115.ctuning-midatasets.index.json
     url: ''
-  - index: files/20261115.ck-office-snapshots.index.json
-    url: ''
+    hub: ctuning/cTuning-MiDataSets
+  - index: files/20261116.ck-office-snapshots.index.json
+    url: 'https://zenodo.org/records/24275729/files/{name}?download=1'
+    hub: ''
 
 configs:
   task-get-ctuning-dataset:
-    desc: Where this machine takes the capsules of the cTuning MiDataSets and of the CK office snapshots from.
+    desc: Where this machine takes the capsules of the cTuning MiDataSets and the files of the office snapshots from.
     keys:
       capsules:
         desc: >-
-          a folder with the capsules (20261115.ctuning-midatasets.<kind>.tar.gz), or a URL with {name} for the
-          file name of a capsule; --capsules on the command line wins, the task's default (the Zenodo record,
-          once it exists) is taken without either
+          a folder with the capsules (20261115.ctuning-midatasets.<kind>.tar.gz) or the published files
+          (dataset.ctuning-image-jpg-fgg-office.day.data_orig.jpg ...), or a URL with {name} for the file name,
+          several separated by ";"; --capsules on the command line wins, the task's default (the Zenodo records,
+          once they exist) is taken without either

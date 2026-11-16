@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-consumer-mad'
   ck_uid: 'f258a1b1479593a5'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'config.h: snprintf and vsnprintf mapped to _snprintf and _vsnprintf only for MSVC before 2015, which had no C99 ones (the macros are an error with the Universal CRT)'
@@ -21,6 +21,12 @@ license:
   name: 'GNU GPL v2 or later (MAD, Robert Leslie)'
   spdx: 'GPL-2.0-or-later'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output.tmp'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

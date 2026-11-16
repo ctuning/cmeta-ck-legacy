@@ -1,0 +1,130 @@
+authors: Grigori Fursin
+description: 'cBench inputs image-pgm (cTuning MiDataSets): 21 inputs (image-pgm-0001 ... image-pgm-2013), image-pgm-0001 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder image-pgm), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+
+# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
+# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# machine): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-hf-dataset,9865f4ce243f4984
+    repo: 'ctuning/cTuning-MiDataSets'
+    filename: 'image-pgm/*'
+result_from_ctx: '{{global.get-hf-dataset}}'
+sub_datasets_folder: 'image-pgm'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-image-pgm/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  image-pgm-0001:
+    desc: 'the small input of cBench (CK ctuning-datasets-min)'
+    files: ['data.pgm']
+    size: 270015
+    tags: ['small']
+    ck: {entry: 'dataset:image-pgm-0001', uid: 'b2130844c38e4a56', created: '2012-04-12', repo: 'ctuning-datasets-min'}
+  image-pgm-0002:
+    desc: 'input 2 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 319525
+    ck: {entry: 'dataset:image-pgm-0002', uid: '484aeab7d22526d9', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0003:
+    desc: 'input 3 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 739278
+    ck: {entry: 'dataset:image-pgm-0003', uid: '96a9035d72b40eda', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0004:
+    desc: 'input 4 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 67641
+    ck: {entry: 'dataset:image-pgm-0004', uid: '180a959b749cbbdc', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0005:
+    desc: 'input 5 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 717894
+    ck: {entry: 'dataset:image-pgm-0005', uid: '4b74a9bee7aeef96', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0006:
+    desc: 'input 6 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 741229
+    ck: {entry: 'dataset:image-pgm-0006', uid: '358161e73414283b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0007:
+    desc: 'input 7 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 191115
+    ck: {entry: 'dataset:image-pgm-0007', uid: 'ae573d5866e4208b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0008:
+    desc: 'input 8 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 43893
+    ck: {entry: 'dataset:image-pgm-0008', uid: 'fd23f452bba13bb5', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0009:
+    desc: 'input 9 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 1394647
+    ck: {entry: 'dataset:image-pgm-0009', uid: 'e3b89df635422f84', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0010:
+    desc: 'input 10 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 87327
+    ck: {entry: 'dataset:image-pgm-0010', uid: '24744d96bab7a231', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0011:
+    desc: 'input 11 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 686096
+    ck: {entry: 'dataset:image-pgm-0011', uid: 'df9c9a7645f2a3d8', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0012:
+    desc: 'input 12 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 1202096
+    ck: {entry: 'dataset:image-pgm-0012', uid: 'fac7234bcca0c115', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0013:
+    desc: 'input 13 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 52015
+    ck: {entry: 'dataset:image-pgm-0013', uid: 'be80c04687ac11b5', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0014:
+    desc: 'input 14 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 311419
+    ck: {entry: 'dataset:image-pgm-0014', uid: 'fba8baa53ff6c8de', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0015:
+    desc: 'input 15 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 576015
+    ck: {entry: 'dataset:image-pgm-0015', uid: '7f94a742f3d980d0', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0016:
+    desc: 'input 16 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 106014
+    ck: {entry: 'dataset:image-pgm-0016', uid: '34152829d4f595df', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0017:
+    desc: 'input 17 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 230415
+    ck: {entry: 'dataset:image-pgm-0017', uid: 'f12fc181aa0460e8', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0018:
+    desc: 'input 18 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 179090
+    ck: {entry: 'dataset:image-pgm-0018', uid: '33891f812d69ae12', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0019:
+    desc: 'input 19 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 988465
+    ck: {entry: 'dataset:image-pgm-0019', uid: '4eab2819fc5204c6', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-0020:
+    desc: 'input 20 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 381115
+    ck: {entry: 'dataset:image-pgm-0020', uid: '4a599e2d74054bd3', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-2013:
+    desc: 'input 21 of 21 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm', 'LICENCE.txt', 'README.txt']
+    size: 16184
+    ck: {entry: 'dataset:image-pgm-2013', uid: '4c5095b51f4bed41', created: '2012-10-23', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets-min, ctuning-datasets'
+  hub: 'ctuning/cTuning-MiDataSets'
+  capsule: '20261115.ctuning-midatasets.image-pgm.tar.gz'
+  index: 'task/get-ctuning-dataset/files/20261115.ctuning-midatasets.index.json'
+  converted: '2026-11-16 by task::import-ck'

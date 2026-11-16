@@ -12,18 +12,25 @@ cx program run polybench-cpu-cholesky cpu -q
 cx program run polybench-cpu-cholesky --compute=android-cpu --target_tmp=tmp-android-cpu -q
 ```
 
-Sizes: CK's by default (N=16), with the arrays dumped into `tmp-ck-output-dump.txt`
+Sizes: CK's by default (N=16), with the arrays dumped into `tmp-ck-output-dump.txt`,
 (the result to compare between targets). `--compile.size=mini|small|standard|large|extralarge`
 takes the sizes of PolyBench's header instead, without the dump unless `--compile.dump=yes`;
-`--compile.dump=no` leaves the dump out. Each choice is a build of its own.
+`--compile.n=<N>` makes every dimension N (square arrays); `--compile.dump=no` leaves the dump out;
+`--compile.precision=float|double` sets `DATA_TYPE`; `--compile.d.<NAME>=<value>` any define. Each
+choice is a build of its own, and part of the key of its reference outputs.
 
 ```bash
 cx program run polybench-cpu-cholesky cpu --compile.size=large -q
+cx program run polybench-cpu-cholesky cpu --compile.n=512 --compile.precision=float -q
 ```
 
-`--repeat=<n>` repeats the kernel n times (`CT_REPEAT_MAIN`). Standard output and error go to
-`tmp-output1.tmp` and `tmp-output2.tmp` of the build folder (not on iOS); the times of the
-kernel, from xOpenME, are in the result (`stats-xopenme`, `tmp-ck-timer.json`).
+`--repeat=<n>` repeats the kernel n times (`CT_REPEAT_MAIN`); `--calibrate[=<seconds>]` raises the
+repeat until the run lasts about the target (4 s, as CK did; at most `--calibrate_max=10` rounds).
+Standard output and error go to `tmp-output1.tmp` and `tmp-output2.tmp` of the build folder (not on
+iOS); the times of the kernel, from xOpenME, are in the result (`stats-xopenme`, `tmp-ck-timer.json`).
+The summary printed after the run names the parameters and the defines of the build; `--check_output`
+compares the outputs with the reference of the same command, input and parameters (`program.output`),
+or records one.
 
 ## Changes to the CK sources
 

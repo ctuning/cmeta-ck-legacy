@@ -1,0 +1,19 @@
+artifact: 4c11ea104ca24aa1
+authors: Grigori Fursin
+category: dataset,fdd7c5ded7464161
+creation_timestamp: '2026-11-16T06:51:55.633635+00:00'
+desc: 'CK paper inputs image-raw-fgg-office-small (the office webcam snapshots of
+  the CK paper, smaller versions of the snapshots as text, one pixel value per line):
+  2 inputs, on demand.'
+generator:
+  agent: Claude Code 2.1.322
+  by: Grigori Fursin
+  method: agent
+  via: cmeta 0.42.0
+tags:
+- ctuning
+- ck-paper
+- office
+- image
+- raw
+- small

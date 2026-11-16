@@ -1,0 +1,64 @@
+authors: Grigori Fursin
+description: 'cBench inputs image-pgm-clean-gray-square (cTuning MiDataSets): 8 inputs (image-pgm-clean-gray-square-1024-768-8 ... image-pgm-clean-gray-square-8-8-8), image-pgm-clean-gray-square-600-450-8 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder image-pgm-clean-gray-square), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+
+# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
+# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# machine): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-hf-dataset,9865f4ce243f4984
+    repo: 'ctuning/cTuning-MiDataSets'
+    filename: 'image-pgm-clean-gray-square/*'
+result_from_ctx: '{{global.get-hf-dataset}}'
+sub_datasets_folder: 'image-pgm-clean-gray-square'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-image-pgm-clean-gray-square/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  image-pgm-clean-gray-square-1024-768-8:
+    desc: 'input 1 of 8 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 786487
+    ck: {entry: 'dataset:image-pgm-clean-gray-square-1024-768-8', uid: '6fd3ab2204f4654b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-clean-gray-square-2048-1536-8:
+    desc: 'input 2 of 8 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 3145784
+    ck: {entry: 'dataset:image-pgm-clean-gray-square-2048-1536-8', uid: '42b3b6fb6fa8d8a9', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-clean-gray-square-2048-2048-8:
+    desc: 'input 3 of 8 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 4194360
+    ck: {entry: 'dataset:image-pgm-clean-gray-square-2048-2048-8', uid: '37428c8f9cf9b72a', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-clean-gray-square-3000-3000-8:
+    desc: 'input 4 of 8 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 9000056
+    ck: {entry: 'dataset:image-pgm-clean-gray-square-3000-3000-8', uid: '5e942f339841c88b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-clean-gray-square-4096-3072-8:
+    desc: 'input 5 of 8 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 12582968
+    ck: {entry: 'dataset:image-pgm-clean-gray-square-4096-3072-8', uid: '8aaf8c2103c9f519', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-clean-gray-square-600-450-8:
+    desc: 'the small input of cBench (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 270054
+    ck: {entry: 'dataset:image-pgm-clean-gray-square-600-450-8', uid: 'c5a378cde441bbb7', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-clean-gray-square-64-64-8:
+    desc: 'input 7 of 8 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 4148
+    ck: {entry: 'dataset:image-pgm-clean-gray-square-64-64-8', uid: '1fb63ba874687b15', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-pgm-clean-gray-square-8-8-8:
+    desc: 'input 8 of 8 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.pgm']
+    size: 114
+    ck: {entry: 'dataset:image-pgm-clean-gray-square-8-8-8', uid: 'f27b4006a66d22c8', created: '2012-04-12', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets'
+  hub: 'ctuning/cTuning-MiDataSets'
+  capsule: '20261115.ctuning-midatasets.image-pgm-clean-gray-square.tar.gz'
+  index: 'task/get-ctuning-dataset/files/20261115.ctuning-midatasets.index.json'
+  converted: '2026-11-16 by task::import-ck'

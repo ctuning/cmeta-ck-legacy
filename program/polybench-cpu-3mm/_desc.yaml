@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:polybench-cpu-3mm'
   ck_uid: '273ffbb4f669879b'
   ck_created: '2012-07-08'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - '3mm.h: the printf format of DATA_TYPE by token pasting (MSVC refuses "#if DATA_TYPE == double")'
@@ -21,6 +21,12 @@ license:
   name: 'GNU GPL v2 (PolyBench/C 3.2, copyright 2011-2012 the Ohio State University; the licence of the PolyBench project on SourceForge)'
   spdx: 'GPL-2.0-only'
   file: 'src/LICENSE.txt'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-ck-output-dump.txt'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

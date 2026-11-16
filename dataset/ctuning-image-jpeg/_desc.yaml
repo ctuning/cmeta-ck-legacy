@@ -1,0 +1,125 @@
+authors: Grigori Fursin
+description: 'cBench inputs image-jpeg (cTuning MiDataSets): 20 inputs (image-jpeg-0001 ... image-jpeg-0020), image-jpeg-0001 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder image-jpeg), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+
+# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
+# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# machine): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-hf-dataset,9865f4ce243f4984
+    repo: 'ctuning/cTuning-MiDataSets'
+    filename: 'image-jpeg/*'
+result_from_ctx: '{{global.get-hf-dataset}}'
+sub_datasets_folder: 'image-jpeg'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-image-jpeg/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  image-jpeg-0001:
+    desc: 'the small input of cBench (CK ctuning-datasets-min)'
+    files: ['data.jpg']
+    size: 8689
+    tags: ['small']
+    ck: {entry: 'dataset:image-jpeg-0001', uid: '1aaaa23c44e588f9', created: '2012-04-12', repo: 'ctuning-datasets-min'}
+  image-jpeg-0002:
+    desc: 'input 2 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 13778
+    ck: {entry: 'dataset:image-jpeg-0002', uid: '481066c6404d96b7', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0003:
+    desc: 'input 3 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 607658
+    ck: {entry: 'dataset:image-jpeg-0003', uid: '38cfe7c67cec0612', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0004:
+    desc: 'input 4 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 45538
+    ck: {entry: 'dataset:image-jpeg-0004', uid: 'c59c2aab21a48a29', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0005:
+    desc: 'input 5 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 3669
+    ck: {entry: 'dataset:image-jpeg-0005', uid: '9ddbbe02281b6d13', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0006:
+    desc: 'input 6 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 5885
+    ck: {entry: 'dataset:image-jpeg-0006', uid: '65d42f68279f6b63', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0007:
+    desc: 'input 7 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 57487
+    ck: {entry: 'dataset:image-jpeg-0007', uid: '24b4e8d89ff3cc85', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0008:
+    desc: 'input 8 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 28717
+    ck: {entry: 'dataset:image-jpeg-0008', uid: '96fdd91703544877', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0009:
+    desc: 'input 9 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 17470
+    ck: {entry: 'dataset:image-jpeg-0009', uid: 'c1242929d23e4899', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0010:
+    desc: 'input 10 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 47529
+    ck: {entry: 'dataset:image-jpeg-0010', uid: 'bf8554677900d79e', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0011:
+    desc: 'input 11 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 409456
+    ck: {entry: 'dataset:image-jpeg-0011', uid: '2b8f9d53789948f6', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0012:
+    desc: 'input 12 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 23954
+    ck: {entry: 'dataset:image-jpeg-0012', uid: 'ab3453cad8a007bc', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0013:
+    desc: 'input 13 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 15078
+    ck: {entry: 'dataset:image-jpeg-0013', uid: '175c91c2e97845a5', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0014:
+    desc: 'input 14 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 44617
+    ck: {entry: 'dataset:image-jpeg-0014', uid: '8df77b462ea8b0a3', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0015:
+    desc: 'input 15 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 106069
+    ck: {entry: 'dataset:image-jpeg-0015', uid: 'bd7b4b0a8ff44d45', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0016:
+    desc: 'input 16 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 34285
+    ck: {entry: 'dataset:image-jpeg-0016', uid: '5458e41669da5482', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0017:
+    desc: 'input 17 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 1503996
+    ck: {entry: 'dataset:image-jpeg-0017', uid: '4dfb81be6aa11ece', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0018:
+    desc: 'input 18 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 43534
+    ck: {entry: 'dataset:image-jpeg-0018', uid: '3da4b4444db6588f', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0019:
+    desc: 'input 19 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 58844
+    ck: {entry: 'dataset:image-jpeg-0019', uid: '406b4c40b3854b42', created: '2012-04-12', repo: 'ctuning-datasets'}
+  image-jpeg-0020:
+    desc: 'input 20 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.jpg']
+    size: 48743
+    ck: {entry: 'dataset:image-jpeg-0020', uid: 'eb0c3b428c284c33', created: '2012-04-12', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets-min, ctuning-datasets'
+  hub: 'ctuning/cTuning-MiDataSets'
+  capsule: '20261115.ctuning-midatasets.image-jpeg.tar.gz'
+  index: 'task/get-ctuning-dataset/files/20261115.ctuning-midatasets.index.json'
+  converted: '2026-11-16 by task::import-ck'

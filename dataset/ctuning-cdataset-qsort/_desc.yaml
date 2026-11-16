@@ -1,0 +1,124 @@
+authors: Grigori Fursin
+description: 'cBench inputs cdataset-qsort (cTuning MiDataSets): 20 inputs (cdataset-qsort-0001 ... cdataset-qsort-0020), cdataset-qsort-0001 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder cdataset-qsort), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+
+# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
+# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# machine): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-hf-dataset,9865f4ce243f4984
+    repo: 'ctuning/cTuning-MiDataSets'
+    filename: 'cdataset-qsort/*'
+result_from_ctx: '{{global.get-hf-dataset}}'
+sub_datasets_folder: 'cdataset-qsort'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-cdataset-qsort/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  cdataset-qsort-0001:
+    desc: 'the small input of cBench (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 1072593
+    ck: {entry: 'dataset:cdataset-qsort-0001', uid: '4da7a3315bbecc00', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0002:
+    desc: 'input 2 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 609346
+    ck: {entry: 'dataset:cdataset-qsort-0002', uid: 'a9f4876895bc709c', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0003:
+    desc: 'input 3 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 831033
+    ck: {entry: 'dataset:cdataset-qsort-0003', uid: 'd2a1f745d7abea5c', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0004:
+    desc: 'input 4 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 936778
+    ck: {entry: 'dataset:cdataset-qsort-0004', uid: '679f1bd941609522', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0005:
+    desc: 'input 5 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 675834
+    ck: {entry: 'dataset:cdataset-qsort-0005', uid: '04cafbf8f743f376', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0006:
+    desc: 'input 6 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 201444
+    ck: {entry: 'dataset:cdataset-qsort-0006', uid: '091ae4a3b8ea2327', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0007:
+    desc: 'input 7 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 762787
+    ck: {entry: 'dataset:cdataset-qsort-0007', uid: '854270a7ba01dc80', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0008:
+    desc: 'input 8 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 560423
+    ck: {entry: 'dataset:cdataset-qsort-0008', uid: '9a197cfa4edc8724', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0009:
+    desc: 'input 9 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 964728
+    ck: {entry: 'dataset:cdataset-qsort-0009', uid: 'f4ec090c970fcd7f', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0010:
+    desc: 'input 10 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 850363
+    ck: {entry: 'dataset:cdataset-qsort-0010', uid: 'a9dfa0be1f6e44ee', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0011:
+    desc: 'input 11 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 338043
+    ck: {entry: 'dataset:cdataset-qsort-0011', uid: '46db947509ba03c4', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0012:
+    desc: 'input 12 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 906324
+    ck: {entry: 'dataset:cdataset-qsort-0012', uid: '6948ca7ce44b58d2', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0013:
+    desc: 'input 13 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 810405
+    ck: {entry: 'dataset:cdataset-qsort-0013', uid: '94849840f6e6e0c6', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0014:
+    desc: 'input 14 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 506505
+    ck: {entry: 'dataset:cdataset-qsort-0014', uid: '663247f2a5c65045', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0015:
+    desc: 'input 15 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 375844
+    ck: {entry: 'dataset:cdataset-qsort-0015', uid: '2da4a16a2da2421f', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0016:
+    desc: 'input 16 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 117074
+    ck: {entry: 'dataset:cdataset-qsort-0016', uid: '54102859ea20ac86', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0017:
+    desc: 'input 17 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 777981
+    ck: {entry: 'dataset:cdataset-qsort-0017', uid: '347f7a443223174b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0018:
+    desc: 'input 18 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 1042397
+    ck: {entry: 'dataset:cdataset-qsort-0018', uid: '10994268b3e0fed5', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0019:
+    desc: 'input 19 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 202122
+    ck: {entry: 'dataset:cdataset-qsort-0019', uid: 'c52f45a99577b5ea', created: '2012-04-12', repo: 'ctuning-datasets'}
+  cdataset-qsort-0020:
+    desc: 'input 20 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.txt']
+    size: 1205252
+    ck: {entry: 'dataset:cdataset-qsort-0020', uid: '9a0be2c0fc740bd8', created: '2012-04-12', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets'
+  hub: 'ctuning/cTuning-MiDataSets'
+  capsule: '20261115.ctuning-midatasets.cdataset-qsort.tar.gz'
+  index: 'task/get-ctuning-dataset/files/20261115.ctuning-midatasets.index.json'
+  converted: '2026-11-16 by task::import-ck'

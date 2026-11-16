@@ -10,12 +10,18 @@ origin:
   ck_entry: 'program:cbench-automotive-bitcount'
   ck_uid: 'eb5d37157876f88d'
   ck_created: '2012-04-12'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
 
 # The licence of the sources (the cMeta description and hooks: Apache-2.0)
 license:
   name: 'SNIPPETS collection: "FREE with no restrictions"'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output1.tmp'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

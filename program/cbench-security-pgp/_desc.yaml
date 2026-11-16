@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-security-pgp'
   ck_uid: '4ff1b558b4be8853'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'system.h, system.c: no strlwr of its own with MSVC, whose C library has it (two declarations of one function are an error)'
@@ -20,6 +20,12 @@ origin:
 license:
   name: 'PGP 2.6.3i licence: "free for use internationally"; the RSA and IDEA patents it names have expired'
   file: 'src/LICENSE'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output.tmp'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:
@@ -175,4 +181,8 @@ updates_cmd:
             cmd_main: '-s {qinput_files.data} test -o tmp-output.tmp {{local.ck_redirects|}}'
     local_vars:
       +output_files:
+        - 'tmp-output.tmp'
+    # The reference outputs (cx program run ... --check_output): the signature holds the time it was made
+    output_check:
+      skip:
         - 'tmp-output.tmp'

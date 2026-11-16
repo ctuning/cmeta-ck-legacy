@@ -22,6 +22,18 @@ license:
   name: 'not stated by its authors: copyright 2012 University of Delaware, citation requested (PolyBench/GPU 1.0; its OpenCL codes derive from PolyBench 2.0, GPLv2)'
   file: 'src/NOTICE.txt'
 
+# The reference outputs (cx program run ... --check_output): the standard output says whether the GPU's result matches the CPU's (the platform and device it names are left out)
+output_check:
+  files:
+    - 'tmp-output2.tmp'
+    - 'tmp-output1.tmp'
+  ignore_lines:
+    - '^number of platforms is '
+    - '^platform name is '
+    - '^platform version is '
+    - '^number of devices is '
+    - '^device name is '
+
 ###################################################################################################
 local_vars:
   lang: c

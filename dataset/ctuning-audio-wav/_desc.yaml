@@ -1,0 +1,125 @@
+authors: Grigori Fursin
+description: 'cBench inputs audio-wav (cTuning MiDataSets): 20 inputs (audio-wav-0001 ... audio-wav-0020), audio-wav-0001 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder audio-wav), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+
+# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
+# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# machine): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-hf-dataset,9865f4ce243f4984
+    repo: 'ctuning/cTuning-MiDataSets'
+    filename: 'audio-wav/*'
+result_from_ctx: '{{global.get-hf-dataset}}'
+sub_datasets_folder: 'audio-wav'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-audio-wav/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  audio-wav-0001:
+    desc: 'the small input of cBench (CK ctuning-datasets-min)'
+    files: ['data.wav']
+    size: 311096
+    tags: ['small']
+    ck: {entry: 'dataset:audio-wav-0001', uid: '3611ef3f4f4daa2f', created: '2012-04-12', repo: 'ctuning-datasets-min'}
+  audio-wav-0002:
+    desc: 'input 2 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 11082296
+    ck: {entry: 'dataset:audio-wav-0002', uid: 'f46fd44c9eb505d6', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0003:
+    desc: 'input 3 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 709688
+    ck: {entry: 'dataset:audio-wav-0003', uid: '93043b6925502e49', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0004:
+    desc: 'input 4 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 1235000
+    ck: {entry: 'dataset:audio-wav-0004', uid: 'eb1435c84110c19e', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0005:
+    desc: 'input 5 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 1235000
+    ck: {entry: 'dataset:audio-wav-0005', uid: 'd819bd461e88a79c', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0006:
+    desc: 'input 6 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 2999864
+    ck: {entry: 'dataset:audio-wav-0006', uid: 'aea9a193dc9a3ce9', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0007:
+    desc: 'input 7 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 1414712
+    ck: {entry: 'dataset:audio-wav-0007', uid: '6ad4e49d14944eb5', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0008:
+    desc: 'input 8 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 741944
+    ck: {entry: 'dataset:audio-wav-0008', uid: '55b9b280f44473b3', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0009:
+    desc: 'input 9 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 518456
+    ck: {entry: 'dataset:audio-wav-0009', uid: 'fbc4d2abdb1ee9a1', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0010:
+    desc: 'input 10 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 665912
+    ck: {entry: 'dataset:audio-wav-0010', uid: '1fcac98b44ca7960', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0011:
+    desc: 'input 11 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 1373240
+    ck: {entry: 'dataset:audio-wav-0011', uid: '4612a42e70eb1163', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0012:
+    desc: 'input 12 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 677432
+    ck: {entry: 'dataset:audio-wav-0012', uid: '34e52b70738b668b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0013:
+    desc: 'input 13 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 1142840
+    ck: {entry: 'dataset:audio-wav-0013', uid: '44d1ab7d287095f4', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0014:
+    desc: 'input 14 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 3013688
+    ck: {entry: 'dataset:audio-wav-0014', uid: 'b884f99648db6255', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0015:
+    desc: 'input 15 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 368696
+    ck: {entry: 'dataset:audio-wav-0015', uid: '409a42e6a001ff6e', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0016:
+    desc: 'input 16 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 532280
+    ck: {entry: 'dataset:audio-wav-0016', uid: '3b54f5dc17475dac', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0017:
+    desc: 'input 17 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 2299448
+    ck: {entry: 'dataset:audio-wav-0017', uid: '7ae4594749d09ea0', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0018:
+    desc: 'input 18 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 172856
+    ck: {entry: 'dataset:audio-wav-0018', uid: 'fd64ff2adb625852', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0019:
+    desc: 'input 19 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 529976
+    ck: {entry: 'dataset:audio-wav-0019', uid: '000d91a4e5e84ec0', created: '2012-04-12', repo: 'ctuning-datasets'}
+  audio-wav-0020:
+    desc: 'input 20 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.wav']
+    size: 1764920
+    ck: {entry: 'dataset:audio-wav-0020', uid: '22d4242b9b7f719e', created: '2012-04-12', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets-min, ctuning-datasets'
+  hub: 'ctuning/cTuning-MiDataSets'
+  capsule: '20261115.ctuning-midatasets.audio-wav.tar.gz'
+  index: 'task/get-ctuning-dataset/files/20261115.ctuning-midatasets.index.json'
+  converted: '2026-11-16 by task::import-ck'

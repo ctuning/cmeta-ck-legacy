@@ -10,7 +10,7 @@ origin:
   ck_entry: 'program:cbench-office-stringsearch2'
   ck_uid: 'de64f4757a409aaf'
   ck_created: '2012-09-23'
-  converted: '2026-11-15 by task::import-ck'
+  converted: '2026-11-16 by task::import-ck'
   # What was changed in the CK sources, and why
   patches:
     - 'fgg_search.c: the tables of the lines of both files as long as the files (malloc after counting); they were 30000 entries each on the stack, and inputs of the MiDataSets have more lines (txt-0004: 40001 search strings), which crashed the program; the lines are counted with the buffer size they are read with, so that both passes agree'
@@ -20,6 +20,12 @@ license:
   name: 'BSD 4-clause (University of California), in the source'
   spdx: 'BSD-4-Clause-UC'
   file: 'src/fgg_search.c'
+
+# The reference outputs (cx program run ... --check_output)
+output_check:
+  files:
+    - 'tmp-output.tmp'
+    - 'tmp-output2.tmp'
 
 ###################################################################################################
 local_vars:

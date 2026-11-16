@@ -1,0 +1,125 @@
+authors: Grigori Fursin
+description: 'cBench inputs gsm (cTuning MiDataSets): 20 inputs (gsm-0001 ... gsm-0020), gsm-0001 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder gsm), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+
+# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
+# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# machine): a folder per input. The inputs in files/ of this artifact are taken from there
+uses:
+  - task: get-hf-dataset,9865f4ce243f4984
+    repo: 'ctuning/cTuning-MiDataSets'
+    filename: 'gsm/*'
+result_from_ctx: '{{global.get-hf-dataset}}'
+sub_datasets_folder: 'gsm'
+
+# The inputs (sub-datasets) in order, the first is the default - cx program run <program> cpu --dataset=ctuning-gsm/<input>:
+# the files in the order a program takes them (the first is the main one), the size in bytes, the input's own tags,
+# the number it stands for (CK: run_cmd_main.dataset_number), its CK entry
+sub_datasets:
+  gsm-0001:
+    desc: 'the small input of cBench (CK ctuning-datasets-min)'
+    files: ['data.gsm']
+    size: 15939
+    tags: ['small']
+    ck: {entry: 'dataset:gsm-0001', uid: '40dd9654fcf79191', created: '2012-04-12', repo: 'ctuning-datasets-min'}
+  gsm-0002:
+    desc: 'input 2 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 1142427
+    ck: {entry: 'dataset:gsm-0002', uid: '91a8b3ca4dde2b02', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0003:
+    desc: 'input 3 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 72765
+    ck: {entry: 'dataset:gsm-0003', uid: '444285c2998e378f', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0004:
+    desc: 'input 4 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 127347
+    ck: {entry: 'dataset:gsm-0004', uid: '647bdf42c99139be', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0005:
+    desc: 'input 5 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 127347
+    ck: {entry: 'dataset:gsm-0005', uid: 'ac591a84f32f0f03', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0006:
+    desc: 'input 6 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 309276
+    ck: {entry: 'dataset:gsm-0006', uid: '43303944198da02e', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0007:
+    desc: 'input 7 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 145530
+    ck: {entry: 'dataset:gsm-0007', uid: '945965d8add4ca28', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0008:
+    desc: 'input 8 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 76263
+    ck: {entry: 'dataset:gsm-0008', uid: '420826a143d9850b', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0009:
+    desc: 'input 9 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 18249
+    ck: {entry: 'dataset:gsm-0009', uid: '14a8faeea94c9f77', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0010:
+    desc: 'input 10 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 34122
+    ck: {entry: 'dataset:gsm-0010', uid: '1fa9693d43fe9021', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0011:
+    desc: 'input 11 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 70620
+    ck: {entry: 'dataset:gsm-0011', uid: '36f0a48018bd46a7', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0012:
+    desc: 'input 12 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 23826
+    ck: {entry: 'dataset:gsm-0012', uid: '47b1a7d184db2ba4', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0013:
+    desc: 'input 13 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 117876
+    ck: {entry: 'dataset:gsm-0013', uid: 'cf8144c5a591d1eb', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0014:
+    desc: 'input 14 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 106887
+    ck: {entry: 'dataset:gsm-0014', uid: '7f9e37c0ec8341c3', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0015:
+    desc: 'input 15 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 18843
+    ck: {entry: 'dataset:gsm-0015', uid: '9c2b480844539a13', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0016:
+    desc: 'input 16 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 27291
+    ck: {entry: 'dataset:gsm-0016', uid: '27acfe4a2ab46eda', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0017:
+    desc: 'input 17 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 118371
+    ck: {entry: 'dataset:gsm-0017', uid: 'c102994849845c55', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0018:
+    desc: 'input 18 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 8712
+    ck: {entry: 'dataset:gsm-0018', uid: '1443eaafc5ac6298', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0019:
+    desc: 'input 19 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 54582
+    ck: {entry: 'dataset:gsm-0019', uid: '8dcc59144cd6af00', created: '2012-04-12', repo: 'ctuning-datasets'}
+  gsm-0020:
+    desc: 'input 20 of 20 of the cTuning MiDataSets (CK ctuning-datasets)'
+    files: ['data.gsm']
+    size: 181896
+    ck: {entry: 'dataset:gsm-0020', uid: 'c54633864ecf67ad', created: '2012-04-12', repo: 'ctuning-datasets'}
+
+origin:
+  ck_repos: 'ctuning-datasets-min, ctuning-datasets'
+  hub: 'ctuning/cTuning-MiDataSets'
+  capsule: '20261115.ctuning-midatasets.gsm.tar.gz'
+  index: 'task/get-ctuning-dataset/files/20261115.ctuning-midatasets.index.json'
+  converted: '2026-11-16 by task::import-ck'
