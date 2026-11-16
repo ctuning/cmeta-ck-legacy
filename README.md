@@ -88,6 +88,13 @@ comment; `--compile.check=no` builds them as CK did).
 
 ### The inputs
 
+> **A note on the MiDataSets inputs.** The cTuning MiDataSets were collected from public web sources in
+> 2006-2007 to evaluate compilers on realistic data, and the origin and licence of each file were not recorded,
+> so their origin is unclear. The small inputs kept in this repository and the full set on the Hugging Face Hub
+> are an archive for research purposes - to reproduce and extend the experiments of that time - and the
+> licence of this repository does not cover them. If a file is yours and you want it removed, please open an
+> issue.
+
 Every kind of input of cBench is one dataset, `dataset/ctuning-<kind>`, and its inputs are its sub-datasets:
 `sub_datasets` of the dataset's `_desc.yaml` lists them in order - the first is what a program takes by
 default - each with its files in the order a program takes them, its size, its tags, the number it stands for
@@ -187,6 +194,11 @@ This repository's own content - the cMeta descriptions, tasks, notes and patches
 IJG, libtiff, PolyBench/C 3.2 under the GPLv2 ...), each in the program's `src/`: **`LICENSES.md`**
 lists the licence of every program and dataset, generated from their descriptions
 (`cx task run import-ck --licenses_md`).
+
+Two parts state no licence. The edge-detection filter of the codelets, `filter.c`, comes from the UTDSP
+benchmark suite (copyright 1992 Mazen A.R. Saghir, University of Toronto) and was changed for the CK paper; it is
+kept as that paper's repository published it. The MiDataSets inputs have an unclear origin (see the note in "The
+inputs"). Both are kept as an archive for research purposes.
 
 ## Git identity
 
