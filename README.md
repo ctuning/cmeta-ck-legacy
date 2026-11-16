@@ -38,13 +38,20 @@ features of a C program.
 ## The inputs
 
 **The cTuning MiDataSets.** The smallest input of each kind is in this repository. The full set, 491 inputs in 23
-kinds, is in the gated Hugging Face dataset
-[ctuning/cTuning-MiDataSets](https://huggingface.co/datasets/ctuning/cTuning-MiDataSets): request access on its
-page once, log in on your machine with `cx tool run hf -- auth login`, and cMeta fetches a kind when a program
-needs it:
+kinds, is in two private Hugging Face datasets of cTuning, which need access:
+
+- [ctuning/cTuning-MiDataSets](https://huggingface.co/datasets/ctuning/cTuning-MiDataSets), a folder per kind,
+  from where cMeta fetches a kind when a program needs it;
+- [ctuning/cmeta-repo-ctuning-midatasets](https://huggingface.co/datasets/ctuning/cmeta-repo-ctuning-midatasets),
+  the same inputs as a cMeta repository, to pull at once.
+
+To get access, please open an issue in this repository with your Hugging Face user name. Then log in once on your
+machine, and use them:
 
 ```sh
-cx program run cbench-consumer-jpeg-c cpu --dataset=ctuning-image-ppm/image-ppm-0007 -q
+cx tool run hf -- auth login
+cx program run cbench-consumer-jpeg-c cpu --dataset=ctuning-image-ppm/image-ppm-0007 -q   # fetches the kind
+cx repo pull hf://ctuning/cmeta-repo-ctuning-midatasets                                   # or every input at once
 ```
 
 > **A note on the MiDataSets.** They were collected from public web sources in 2006-2007 to evaluate compilers on

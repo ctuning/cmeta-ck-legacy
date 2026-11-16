@@ -1,8 +1,8 @@
 authors: Grigori Fursin
-description: 'cBench inputs image-jpeg (cTuning MiDataSets): 20 inputs (image-jpeg-0001 ... image-jpeg-0020), image-jpeg-0001 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder image-jpeg), downloaded once on demand by task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine).'
+description: 'cBench inputs image-jpeg (cTuning MiDataSets): 20 inputs (image-jpeg-0001 ... image-jpeg-0020), image-jpeg-0001 with its files in this repository, the others from the Hugging Face dataset ctuning/cTuning-MiDataSets (its folder image-jpeg), downloaded once on demand by task::get-hf-dataset (access on request as the README says, then hf auth login once on the machine).'
 
 # The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by
-# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the
+# task::get-hf-dataset (access on request as the README says, then "cx tool run hf -- auth login" once on the
 # machine): a folder per input. The inputs in files/ of this artifact are taken from there
 uses:
   - task: get-hf-dataset,9865f4ce243f4984

@@ -588,12 +588,12 @@ class CTask(InitCTask):
             kept = ', '.join(local)
             origin_set = []
             if hub:
-                # The set's folder of a Hugging Face dataset, by get-hf-dataset (a gated repository: access on request)
+                # The set's folder of a Hugging Face dataset, by get-hf-dataset (access on request as the README says)
                 how = (f'the others from the Hugging Face dataset {hub} (its folder {kind}), downloaded once on demand by '
-                       'task::get-hf-dataset (access on request on the Hub, then hf auth login once on the machine)')
+                       'task::get-hf-dataset (access on request as the README says, then hf auth login once on the machine)')
                 origin_set.append(f'  hub: {q(hub)}')
                 source_lines = ['# The set the inputs come from: a folder of a Hugging Face dataset, downloaded once into the cache by',
-                                '# task::get-hf-dataset (access on request on the Hub, then "cx tool run hf -- auth login" once on the',
+                                '# task::get-hf-dataset (access on request as the README says, then "cx tool run hf -- auth login" once on the',
                                 '# machine): a folder per input. The inputs in files/ of this artifact are taken from there',
                                 'uses:',
                                 f'  - task: {TASK_GET_HF_DATASET}',
